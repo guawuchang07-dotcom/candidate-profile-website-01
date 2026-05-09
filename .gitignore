@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-electron
+out
+*.log
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+coverage
+.vercel
+.DS_Store
+Thumbs.db
