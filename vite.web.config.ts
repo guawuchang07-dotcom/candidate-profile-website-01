@@ -18,6 +18,7 @@ export default defineConfig({
         copyFileSync(resolve(__dirname, "src/renderer/src/assets/static/favicon.svg"), resolve(assetsDir, "favicon.svg"));
         copyFileSync(resolve(distDir, "index.html"), resolve(distDir, "404.html"));
         writeFileSync(resolve(distDir, "robots.txt"), "User-agent: *\nAllow: /\n", "utf8");
+        writeFileSync(resolve(distDir, "_redirects"), "/* /index.html 200\n", "utf8");
         writeFileSync(
           resolve(distDir, "STATIC_HOSTING_FALLBACK.md"),
           [
