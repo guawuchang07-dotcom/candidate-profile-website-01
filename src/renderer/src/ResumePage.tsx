@@ -7,14 +7,17 @@ import {
   CheckCircle2,
   Clock,
   Cpu,
+  Database,
   Download,
-  Eye,
+  GitBranch,
   Layers,
   Mail,
   MapPin,
   MessageSquare,
   PlayCircle,
+  Repeat,
   Rocket,
+  Search,
   Video,
   Wrench,
   X
@@ -99,6 +102,17 @@ type ProjectItem = {
   }>;
 };
 
+type AutomationCase = {
+  icon: LucideIcon;
+  title: string;
+  scene: string;
+  description: string;
+  actions: string[];
+  value: string[];
+  proof: string[];
+  tags: string[];
+};
+
 type ToolGroup = {
   title: string;
   subtitle: string;
@@ -123,22 +137,27 @@ type ImagePreview = {
   src: string;
 };
 
-const targetKeywords = ["AI内容运营", "AIGC项目执行", "AI工作流落地", "AI内容生产", "AI协作开发", "AIGC视频项目运营"];
+const targetKeywords = ["业务运营自动化", "AIGC流程控制", "知识库沉淀"];
 
-const targetRoles = ["AIGC内容运营", "AI工具运营", "AI内容生产流程优化", "AIGC项目执行 / 内容交付", "AI工作流落地"];
+const heroProofItems = [
+  "业务运营自动化脚本集：自媒体运营、岗位线索、GitHub 情报",
+  "AIGC 生产控制台：小说分析、资产确认、视频任务复盘",
+  "AI 知识库沉淀系统：Hermes + Obsidian 每日复盘"
+];
 
-const heroValueItems = ["拆解 AI 内容生产流程", "沉淀 Prompt / 分镜 / 质检规则", "搭建 Dify / Coze / Codex 辅助的轻量级 AI 工作流原型", "降低生成返工和流程沟通成本"];
-
-const aboutFocusItems = ["AIGC 内容生产经验", "AI 工具落地", "轻量半自动工作流搭建", "Prompt / 分镜 / 质检规范"];
+const aboutFocusItems = ["业务运营自动化", "AIGC 内容生产流程", "AI Agent 工具落地", "个人知识库沉淀"];
 
 const independentScopes = [
+  "浏览器自动化脚本设计与调试",
+  "自媒体运营、岗位筛选、项目情报等运营流程提效",
   "AIGC 内容生产流程拆解",
   "Prompt / 分镜 / 生图生视频规范沉淀",
   "内容质检标准与返工原因分类",
   "Dify / Coze 轻量知识库与工作流原型搭建",
   "使用 Codex / Cursor 做简单控制台原型",
   "AI 工具测试、对比和适用场景判断",
-  "内容生产 SOP、任务表、状态表设计"
+  "内容生产 SOP、任务表、状态表设计",
+  "Obsidian / Hermes 每日复盘与知识沉淀"
 ];
 
 const collaborationScopes = [
@@ -150,26 +169,59 @@ const collaborationScopes = [
   "高稳定性部署与监控"
 ];
 
-const targetIndustries = ["AI应用公司", "AIGC内容公司", "短视频 / 内容平台", "AI工具团队", "AI视频团队", "AI Agent / 工作流团队"];
+const targetIndustries = ["AI应用公司", "AIGC内容公司", "业务运营团队", "短视频 / 内容平台", "AI工具团队", "AI Agent / 工作流团队"];
 
 const capabilityGroups: CapabilityGroup[] = [
   {
-    icon: Eye,
-    title: "内容洞察",
-    subtitle: "Content & Platform",
-    items: ["短视频平台趋势判断", "爆款内容拆解", "账号运营经验", "选题与内容结构优化"]
+    icon: Repeat,
+    title: "业务运营自动化",
+    subtitle: "Browser Automation for Operations",
+    items: ["自媒体运营辅助", "岗位线索筛选与收藏", "GitHub 项目情报日报", "网页状态记录与复盘"]
   },
   {
     icon: Bot,
-    title: "AI生产",
-    subtitle: "AI Production",
-    items: ["AIGC视频生产", "脚本 / 分镜 / 提示词设计", "生图 / 生视频流程理解", "批量化内容产出"]
+    title: "AIGC生产流程",
+    subtitle: "AI Production Workflow",
+    items: ["小说到视频任务拆解", "脚本 / 分镜 / 提示词设计", "生图 / 生视频链路验证", "失败原因与候选版本管理"]
   },
   {
-    icon: Wrench,
-    title: "AI工具协作",
-    subtitle: "AI协作开发 / Vibe Coding 原型搭建",
-    items: ["Codex / Cursor 协作开发", "Tabbit 浏览器自动化", "Coze 虚拟机流程验证", "GitHub 开源工具组合"]
+    icon: Database,
+    title: "知识与工具沉淀",
+    subtitle: "Knowledge & Tooling System",
+    items: ["Hermes 每日沉淀", "Obsidian 知识库", "开源工具调研", "飞书 CLI 协作探索"]
+  }
+];
+
+const automationCases: AutomationCase[] = [
+  {
+    icon: MessageSquare,
+    title: "自媒体运营辅助脚本",
+    scene: "Twitter / X 内容运营",
+    description: "面向自媒体运营中的重复互动动作，把目标内容识别、点赞、转发、评论草稿和执行状态记录拆成可控脚本流程。",
+    actions: ["识别目标帖子与互动条件", "辅助点赞、转发、评论草稿生成", "记录已处理内容与执行状态", "保留人工确认与规则控制"],
+    value: ["减少重复操作时间", "让内容互动动作更有节奏", "便于复盘哪些内容值得持续跟进"],
+    proof: ["已在自动化浏览器中跑通脚本", "定位为运营动作辅助，不做无规则刷量"],
+    tags: ["浏览器自动化", "自媒体运营", "状态记录", "人工确认"]
+  },
+  {
+    icon: Briefcase,
+    title: "BOSS 岗位线索收藏脚本",
+    scene: "岗位筛选 / 线索管理",
+    description: "把岗位浏览、关键词判断、相关岗位收藏这些重复动作自动化，用于验证网页信息筛选和业务线索收集的提效价值。",
+    actions: ["按岗位关键词和方向筛选", "收藏符合条件的岗位", "减少人工重复翻页浏览", "沉淀岗位信息筛选规则"],
+    value: ["提升岗位线索收集效率", "把个人求职流程抽象成业务线索筛选能力", "可迁移到销售线索、达人线索、竞品信息收集等场景"],
+    proof: ["已接入自动化演示视频", "可在网页流程中展示收藏动作与状态变化"],
+    tags: ["BOSS直聘", "线索筛选", "网页自动化", "流程提效"]
+  },
+  {
+    icon: GitBranch,
+    title: "GitHub 项目情报日报",
+    scene: "开源项目发现 / 工具调研",
+    description: "每天自动整理 GitHub 上值得关注的 AI 项目，把项目简介、适用场景、可试用价值和后续动作沉淀成情报材料。",
+    actions: ["定时扫描项目来源", "总结项目用途与亮点", "判断是否值得安装验证", "沉淀到知识库或工具调研清单"],
+    value: ["持续发现可用工具", "减少盲目收藏 GitHub 项目", "为 AI Agent 和业务自动化补充工具储备"],
+    proof: ["已有每日 GitHub 项目总结脚本", "可与 Obsidian 知识库沉淀联动"],
+    tags: ["GitHub", "项目情报", "AI工具调研", "每日自动总结"]
   }
 ];
 
@@ -208,6 +260,68 @@ const projects: ProjectItem[] = [
       { value: "8+", label: "自动化脚本", note: "分析、提示词、CLI、状态" },
       { value: "CLI", label: "真实生成链路", note: "Dreamina dry-run / live-run" },
       { value: "多候选", label: "视频复盘", note: "同任务多版本管理" }
+    ]
+  },
+  {
+    icon: Database,
+    title: "个人 AI 知识库与 Hermes 每日沉淀系统",
+    subtitle: "Hermes + Obsidian + Codex",
+    focus: "把 AI 对话转成每日复盘和知识资产",
+    summary: "用 Hermes 作为主要对话入口，每天 23:00 自动读取本地会话，分类识别闲聊、工作推进、AI学习、项目经验和待办，再写入 Obsidian 每日复盘。",
+    background:
+      "项目背景：日常和 AI 对话很容易聊完即散，项目经验、学习内容和任务复盘无法沉淀。这个系统把聊天记录从“临时对话”转成可复盘、可检索、可持续更新的个人知识库。",
+    responsibilities: [
+      "设计 Obsidian 中文目录结构，区分收件箱、对话提炼、个人画像、项目经验、复盘系统和 AI 学习",
+      "接入 Hermes 本地 session 记录，覆盖终端和桌宠两种入口",
+      "编写每日沉淀脚本，自动分类闲聊、工作推进、项目经验、AI学习和待办",
+      "配置 Hermes cron，每天 23:00 自动生成 Obsidian 每日复盘",
+      "优化模型成本，把后台总结从高成本模型切换到轻量模型，并加入输入截断和失败保护"
+    ],
+    tools: ["Hermes", "Obsidian", "Codex", "Python", "Markdown", "Cron", "本地 session"],
+    proof: [
+      "已生成 Obsidian 每日复盘笔记",
+      "已配置每日 23:00 自动沉淀任务",
+      "已支持桌宠多窗口聊天纳入每日总结",
+      "不保存原始对话，默认只沉淀摘要与可执行待办"
+    ],
+    values: [
+      "把 AI 对话从一次性聊天变成可复盘的知识资产",
+      "为项目经验、学习内容和个人画像建立长期沉淀入口",
+      "后续可扩展到团队员工的工作日志和知识库沉淀流程",
+      "展示对 AI 工具、自动化脚本、本地知识库和成本控制的组合能力"
+    ],
+    metrics: [
+      { value: "23:00", label: "每日自动沉淀", note: "Hermes cron 定时执行" },
+      { value: "5类", label: "自动分类", note: "闲聊 / 工作 / 项目 / 学习 / 待办" },
+      { value: "本地", label: "数据归属", note: "Obsidian Markdown 文件" },
+      { value: "低成本", label: "模型策略", note: "轻量模型 + 截断 + 少重试" }
+    ]
+  },
+  {
+    icon: Wrench,
+    title: "飞书 CLI 企业协作自动化探索",
+    subtitle: "Feishu CLI / Team Workflow Automation",
+    focus: "企业协作工具接入 AI Agent 的预研方向",
+    summary: "围绕飞书文档、任务、知识库和团队协作场景，整理 CLI / API 使用方法，验证 AI Agent 能否帮助团队自动更新文档、生成日报和沉淀项目资料。",
+    background:
+      "项目背景：很多团队协作内容分散在飞书文档、任务和群聊中，人工更新和整理成本高。该方向用于探索把企业协作平台接入 AI 工作流的可能性。",
+    responsibilities: [
+      "整理飞书 CLI / API 的基础使用方法和适用边界",
+      "梳理文档创建、内容更新、任务记录、日报生成等高频场景",
+      "设计 AI Agent 调用企业协作工具的安全规则和人工确认节点",
+      "为后续团队级知识库、日报、项目复盘自动化预留接口"
+    ],
+    tools: ["飞书", "CLI", "API", "Hermes", "Codex", "Markdown"],
+    proof: ["进行中：正在整理飞书 CLI 使用方法", "目标是验证企业协作工具自动化，不以复杂后端系统为第一阶段目标"],
+    values: [
+      "把个人自动化经验迁移到企业协作场景",
+      "让日报、文档更新、项目复盘等重复协作动作具备自动化入口",
+      "为业务团队落地 AI Agent 提供更贴近真实办公场景的案例"
+    ],
+    metrics: [
+      { value: "进行中", label: "项目阶段", note: "CLI 用法整理" },
+      { value: "文档", label: "重点场景", note: "日报 / 复盘 / 知识库" },
+      { value: "确认制", label: "安全策略", note: "关键写入前人工确认" }
     ]
   },
   {
@@ -268,13 +382,14 @@ const directorWorks: DirectorWork[] = [
 
 const toolGroups: ToolGroup[] = [
   { title: "AI 协作开发 / Vibe Coding 原型搭建", subtitle: "把需求拆成可运行工具、流程规则和自动化任务", tools: ["Codex", "Cursor", "Claude", "ChatGPT"] },
-  { title: "网页与虚拟机自动化", subtitle: "用于页面操作、流程验证和重复任务辅助", tools: ["Tabbit", "Coze 虚拟机", "OpenClaw", "Hermes", "GitHub 开源项目"] },
+  { title: "浏览器与业务运营自动化", subtitle: "用于自媒体运营、岗位收藏、网页信息筛选和状态记录", tools: ["Tabbit", "Coze 虚拟机", "OpenClaw", "Hermes", "自动化浏览器脚本"] },
+  { title: "知识库与项目情报", subtitle: "用于每日沉淀、GitHub 项目总结和方法论复盘", tools: ["Obsidian", "Hermes cron", "GitHub", "Markdown", "Python"] },
   { title: "AIGC 视频 / 图像工具", subtitle: "用于生图、生视频和提示词迭代", tools: ["即梦", "Seedance", "Midjourney", "ComfyUI"] },
   { title: "内容生产 / 剪辑工具", subtitle: "完成剪辑、包装和成片交付", tools: ["剪映", "CapCut"] },
   { title: "文档 / 平台经验", subtitle: "沉淀流程、复盘记录、内容发布和数据反馈", tools: ["飞书", "Notion", "Excel", "抖音", "小红书", "YouTube", "TikTok"] }
 ];
 
-const workflowSteps = ["选题判断", "脚本拆解", "分镜规划", "提示词规范", "生图 / 生视频", "剪辑交付", "数据复盘"];
+const workflowSteps = ["业务场景识别", "规则拆解", "脚本 / Agent 执行", "状态记录", "结果复盘", "知识沉淀"];
 
 const consoleEvidenceSteps = [
   {
@@ -334,7 +449,7 @@ function CapabilityCard({
   onAutomationDemo: () => void;
 }): JSX.Element {
   const Icon = group.icon;
-  const shouldShowAutomationDemo = group.title === "AI工具协作";
+  const shouldShowAutomationDemo = group.title === "业务运营自动化";
   return (
     <article className="resume-capability-card">
       <div className="resume-card-index">0{index + 1}</div>
@@ -349,10 +464,10 @@ function CapabilityCard({
       </div>
       <ul>
         {group.items.map((item) => (
-          <li className={shouldShowAutomationDemo && item.includes("Tabbit") ? "has-demo-action" : undefined} key={item}>
+          <li className={shouldShowAutomationDemo && item.includes("岗位") ? "has-demo-action" : undefined} key={item}>
             <CheckCircle2 size={14} aria-hidden="true" />
             <span>{item}</span>
-            {shouldShowAutomationDemo && item.includes("Tabbit") && (
+            {shouldShowAutomationDemo && item.includes("岗位") && (
               <button className="resume-capability-demo-button" type="button" onClick={onAutomationDemo}>
                 查看演示
               </button>
@@ -360,6 +475,49 @@ function CapabilityCard({
           </li>
         ))}
       </ul>
+    </article>
+  );
+}
+
+function AutomationCaseCard({ item, index }: { item: AutomationCase; index: number }): JSX.Element {
+  const Icon = item.icon;
+  return (
+    <article className="resume-ops-card">
+      <div className="resume-ops-card-head">
+        <span>OPS 0{index + 1}</span>
+        <Icon size={24} aria-hidden="true" />
+      </div>
+      <h3>{item.title}</h3>
+      <strong>{item.scene}</strong>
+      <p>{item.description}</p>
+      <div className="resume-ops-card-grid">
+        <div>
+          <h4>自动化动作</h4>
+          <ul>
+            {item.actions.map((action) => (
+              <li key={action}>{action}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h4>业务价值</h4>
+          <ul>
+            {item.value.map((value) => (
+              <li key={value}>{value}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="resume-ops-proof">
+        {item.proof.map((proof) => (
+          <span key={proof}>{proof}</span>
+        ))}
+      </div>
+      <div className="resume-ops-tags">
+        {item.tags.map((tag) => (
+          <span key={tag}>{tag}</span>
+        ))}
+      </div>
     </article>
   );
 }
@@ -630,8 +788,8 @@ export default function ResumePage(): JSX.Element {
       <div className="resume-bg-glow resume-bg-glow-purple" aria-hidden="true" />
       <div className="resume-side-hud resume-side-hud-left" aria-hidden="true">
         <span>PROFILE</span>
+        <span>AUTOMATION</span>
         <span>WORKFLOW</span>
-        <span>MEDIA</span>
         <i className="resume-side-sweep" />
         <i className="resume-side-node resume-side-node-a" />
         <i className="resume-side-node resume-side-node-b" />
@@ -646,7 +804,7 @@ export default function ResumePage(): JSX.Element {
       </div>
       <div className="resume-side-hud resume-side-hud-right" aria-hidden="true">
         <span>AI OPS</span>
-        <span>AIGC</span>
+        <span>BUSINESS</span>
         <span>DELIVERY</span>
         <i className="resume-side-sweep" />
         <i className="resume-side-node resume-side-node-a" />
@@ -680,33 +838,22 @@ export default function ResumePage(): JSX.Element {
         <div className="resume-hero-copy">
           <SectionKicker index="01" label="Candidate Positioning" />
           <h1 id="resume-hero-title">张远博</h1>
-          <h2>AIGC内容运营 / AI工具协作 / AI工作流落地</h2>
+          <h2>AI工作流落地 / 业务运营自动化 / AIGC内容生产提效</h2>
           <p className="resume-hero-statement">
-            擅长把 AIGC 内容生产中的脚本、分镜、提示词、参考图、生成失败和质检返工，沉淀为 SOP、知识库和轻量半自动工作流，帮助团队提升内容生产效率。
+            把自媒体运营、岗位筛选、项目情报、AIGC 内容生产和知识沉淀这些重复流程，拆成规则、脚本、Agent 流程和可演示工具。
           </p>
 
           <div className="resume-quick-read" aria-label="30秒看懂我">
-            <span>30秒看懂我</span>
-            <p>定位于内容生产经验与 AI 工具落地之间，适合需要把 AIGC 内容流程、Prompt 规则、知识库和轻量半自动工作流落到实际生产中的团队。</p>
-            <div className="resume-role-tags" aria-label="目标岗位方向">
-              {targetRoles.map((role) => (
-                <span key={role}>{role}</span>
-              ))}
-            </div>
+            <span>核心展示</span>
+            <p>更适合需要把重复网页动作、内容生产流程和 AI 对话沉淀做成可执行工作流的团队。</p>
             <ul>
-              {heroValueItems.map((item) => (
+              {heroProofItems.map((item) => (
                 <li key={item}>
                   <CheckCircle2 size={14} aria-hidden="true" />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div className="resume-info-grid" aria-label="基础信息">
-            <InfoPill icon={Mail} label="邮箱" value="1425514532@qq.com" />
-            <InfoPill icon={MapPin} label="所在地" value="中国 · 杭州" />
-            <InfoPill icon={Clock} label="到岗时间" value="随时" />
           </div>
 
           <div className="resume-hero-actions">
@@ -732,8 +879,8 @@ export default function ResumePage(): JSX.Element {
           </div>
           <div className="resume-profile-lines">
             <span>ROLE FOCUS</span>
-            <strong>AI内容运营 / AI工作流落地</strong>
-            <p>定位于内容经验与 AI 工具落地之间，擅长将 AIGC 内容生产经验沉淀为流程、规范和可演示原型。</p>
+            <strong>AI工作流落地 / 业务自动化</strong>
+            <p>把个人痛点里的流程问题，沉淀成可演示、可复盘、可迁移的工具原型。</p>
           </div>
           <div className="resume-keyword-cloud">
             {targetKeywords.map((keyword) => (
@@ -753,17 +900,17 @@ export default function ResumePage(): JSX.Element {
             ))}
           </div>
           <p>
-            我更关注“AI 内容怎么稳定交付”：把内容判断、平台运营经验和 AI 工具结合起来，拆解选题、脚本、分镜、提示词、生图、生视频到剪辑交付的生产链路。
+            我更关注“AI 怎么进入真实业务流程”：把内容判断、平台运营经验、网页自动化和 AI 工具结合起来，拆解自媒体运营、岗位筛选、项目情报、AIGC 生产和知识沉淀这些高频流程。
           </p>
           <p>
-            当前主要用 Codex、Cursor、Dify、Coze、Tabbit、即梦、Seedance 等工具，把零散 AI 操作整理成可复用的 SOP、知识库和轻量半自动工作流。
+            当前主要用 Codex、Cursor、Hermes、Obsidian、Tabbit、Coze、Dify、即梦、Seedance 等工具，把零散 AI 操作整理成可复用的脚本、SOP、知识库和轻量半自动工作流。
           </p>
         </div>
 
         <div className="resume-workflow-panel" aria-label="内容生产工作流">
           <div className="resume-panel-head">
             <Layers size={18} aria-hidden="true" />
-            <span>CONTENT TO AI WORKFLOW</span>
+            <span>BUSINESS TO AI WORKFLOW</span>
           </div>
           <div className="resume-workflow-track">
             {workflowSteps.map((step, index) => (
@@ -780,7 +927,7 @@ export default function ResumePage(): JSX.Element {
         <div className="resume-section-header">
           <SectionKicker index="03" label="Core Competencies" />
           <h2 id="resume-capability-title">核心能力</h2>
-          <p>能力围绕内容判断、AI 生产和流程落地展开，重点服务内容效率、交付稳定性和复盘迭代。</p>
+          <p>能力围绕业务流程自动化、AIGC 内容生产和知识沉淀展开，重点服务重复操作提效、交付稳定性和复盘迭代。</p>
         </div>
         <div className="resume-capability-grid">
           {capabilityGroups.map((group, index) => (
@@ -789,11 +936,44 @@ export default function ResumePage(): JSX.Element {
         </div>
       </section>
 
+      <section className="resume-screen resume-ops-lab" id="resume-ops-lab" aria-labelledby="resume-ops-title">
+        <div className="resume-section-header">
+          <SectionKicker index="04" label="Business Automation Lab" />
+          <h2 id="resume-ops-title">业务运营自动化脚本集</h2>
+          <p>
+            这部分放在前面，是因为它最能体现“业务提效”价值：把运营中高频、重复、可规则化的网页动作，做成可演示、可记录、可复盘的半自动流程。
+          </p>
+        </div>
+        <div className="resume-ops-overview" aria-label="业务运营自动化整体流程">
+          <div>
+            <Search size={18} aria-hidden="true" />
+            <span>识别业务场景</span>
+          </div>
+          <div>
+            <Layers size={18} aria-hidden="true" />
+            <span>拆成规则与步骤</span>
+          </div>
+          <div>
+            <Repeat size={18} aria-hidden="true" />
+            <span>脚本执行重复动作</span>
+          </div>
+          <div>
+            <Database size={18} aria-hidden="true" />
+            <span>记录状态并复盘</span>
+          </div>
+        </div>
+        <div className="resume-ops-grid">
+          {automationCases.map((item, index) => (
+            <AutomationCaseCard item={item} index={index} key={item.title} />
+          ))}
+        </div>
+      </section>
+
       <section className="resume-screen resume-projects" id="resume-projects" aria-labelledby="resume-project-title">
         <div className="resume-section-header">
-          <SectionKicker index="04" label="Project Experience" />
+          <SectionKicker index="05" label="Project Experience" />
           <h2 id="resume-project-title">项目经历</h2>
-          <p>重点展示 AI 工具协作、AIGC 内容生产和自动化流程落地能力，覆盖需求拆解、工具组合、状态复盘和内容交付。</p>
+          <p>重点展示 AI 工具协作、AIGC 内容生产、知识库沉淀和企业协作自动化能力，覆盖需求拆解、工具组合、状态复盘和内容交付。</p>
         </div>
         <div className="resume-project-list">
           {projects.map((project, index) => (
@@ -804,7 +984,7 @@ export default function ResumePage(): JSX.Element {
 
       <section className="resume-screen resume-ai-extension" aria-labelledby="resume-ai-extension-title">
         <div className="resume-section-header">
-          <SectionKicker index="05" label="Agent Tool Research" />
+          <SectionKicker index="06" label="Agent Tool Research" />
           <h2 id="resume-ai-extension-title">AI Agent 工具调研与自动化验证</h2>
           <p>
             这部分不是单纯工具体验，而是围绕网页自动化、任务拆解、文件处理和本地工作流，验证不同 AI Agent 工具的适用边界，并判断它们能否服务真实内容生产任务。
@@ -847,9 +1027,9 @@ export default function ResumePage(): JSX.Element {
 
       <section className="resume-screen resume-boundary" aria-labelledby="resume-boundary-title">
         <div className="resume-section-header">
-          <SectionKicker index="06" label="Delivery Boundary" />
+          <SectionKicker index="07" label="Delivery Boundary" />
           <h2 id="resume-boundary-title">能力边界与协作方式</h2>
-          <p>定位偏内容生产、AI 工具落地和轻量级 AI 工作流原型验证；复杂工程化能力可以与研发协作完成。</p>
+          <p>定位偏业务流程拆解、AI 工具落地和轻量级 AI 工作流原型验证；复杂工程化能力可以与研发协作完成。</p>
         </div>
         <div className="resume-boundary-grid">
           <article className="resume-boundary-card">
@@ -881,7 +1061,7 @@ export default function ResumePage(): JSX.Element {
 
       <section className="resume-screen resume-director" aria-labelledby="resume-director-title">
         <div className="resume-section-header">
-          <SectionKicker index="07" label="AI Video Direction" />
+          <SectionKicker index="08" label="AI Video Direction" />
           <h2 id="resume-director-title">AI导演作品集</h2>
           <p>
             精选 3 个 AI 导演 / AIGC 漫剧作品，呈现内容理解、分镜设计、提示词优化、视频生成与剪辑交付能力。
@@ -910,10 +1090,10 @@ export default function ResumePage(): JSX.Element {
 
       <section className="resume-screen resume-tools" aria-labelledby="resume-tools-title">
         <div className="resume-section-copy">
-          <SectionKicker index="08" label="Tools & Platform" />
+          <SectionKicker index="09" label="Tools & Platform" />
           <h2 id="resume-tools-title">工具能力</h2>
           <p>
-            工具能力服务于内容生产、流程规范和批量化交付，不以全栈开发能力作为定位。
+            工具能力服务于业务运营自动化、内容生产、流程规范和批量化交付，不以全栈开发能力作为定位。
           </p>
         </div>
         <div className="resume-tool-matrix">
@@ -936,9 +1116,9 @@ export default function ResumePage(): JSX.Element {
 
       <section className="resume-screen resume-target" aria-labelledby="resume-target-title">
         <div className="resume-section-header">
-          <SectionKicker index="09" label="Target Teams" />
+          <SectionKicker index="10" label="Target Teams" />
           <h2 id="resume-target-title">适配团队</h2>
-          <p>更适合内容生产、AI 视频、AI 工具和工作流落地方向的团队，不以纯后端开发或算法模型训练为主要定位。</p>
+          <p>更适合内容生产、业务运营、AI 工具和工作流落地方向的团队，不以纯后端开发或算法模型训练为主要定位。</p>
         </div>
         <div className="resume-target-grid">
           {targetIndustries.map((industry) => (
@@ -952,9 +1132,9 @@ export default function ResumePage(): JSX.Element {
 
       <section className="resume-screen resume-contact" aria-labelledby="resume-contact-title">
         <div className="resume-contact-card">
-          <SectionKicker index="10" label="Get In Touch" />
+          <SectionKicker index="11" label="Get In Touch" />
           <h2 id="resume-contact-title">联系方式</h2>
-          <p>如果团队需要 AI 内容运营、AIGC 项目执行或 AI 工作流落地方向的候选人，可以通过联系方式联系。</p>
+          <p>如果团队需要业务运营自动化、AI 内容生产提效、AIGC 项目执行或 AI 工作流落地方向的候选人，可以通过联系方式联系。</p>
 
           <div className="resume-contact-grid">
             <InfoPill icon={Mail} label="邮箱" value="1425514532@qq.com" />
@@ -1017,7 +1197,7 @@ export default function ResumePage(): JSX.Element {
               <div>
                 <span>AI AUTOMATION PROOF</span>
                 <h3>网页任务自动化演示</h3>
-                <p>Tabbit 浏览器与 AI Agent 辅助岗位筛选、收藏标记和流程状态记录</p>
+                <p>自动化浏览器与 AI Agent 辅助岗位筛选、收藏标记和流程状态记录</p>
               </div>
               <button type="button" onClick={() => setAutomationDemoOpen(false)} aria-label="关闭演示">
                 <X size={18} aria-hidden="true" />

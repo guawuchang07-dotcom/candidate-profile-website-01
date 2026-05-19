@@ -70,46 +70,63 @@ const loaderRightArrows = ["<", "<", "<"];
 
 const profileAbilities = [
   {
-    icon: "trend",
-    title: "内容洞察",
-    subtitle: "Content & Platform",
-    points: ["短视频平台趋势", "爆款内容拆解", "账号运营经验"]
+    icon: "workflow",
+    title: "业务运营自动化",
+    subtitle: "Browser Automation",
+    points: ["自媒体运营辅助", "岗位线索收藏", "GitHub 项目情报"]
   },
   {
     icon: "ai",
-    title: "AI生产",
+    title: "AIGC生产流程",
     subtitle: "AI Production",
-    points: ["AIGC视频生产", "脚本 / 分镜 / 提示词", "批量化内容产出"]
+    points: ["小说到视频任务", "Prompt / 分镜规则", "候选版本复盘"]
   },
   {
-    icon: "workflow",
-    title: "AI工具协作",
-    subtitle: "Vibe Coding & Automation",
-    points: ["Codex / Cursor 协作", "Tabbit / Coze 自动化", "开源工具组合"]
+    icon: "trend",
+    title: "知识沉淀",
+    subtitle: "Knowledge System",
+    points: ["Hermes 每日复盘", "Obsidian 知识库", "工具调研沉淀"]
   }
 ];
 
 const profileProjects: ProfileProject[] = [
   {
+    icon: "growth",
+    title: "业务运营自动化脚本集",
+    subtitle: "Ops Automation",
+    description: "自媒体运营、岗位线索、项目情报三个场景的自动化入口。",
+    role: "场景拆解、自动化浏览器脚本、规则控制、状态记录、结果复盘",
+    value: "证明可以把业务运营中的重复网页动作做成可演示的提效工具",
+    tags: ["自媒体运营", "岗位线索", "GitHub情报"],
+    detailHref: "resume#resume-ops-lab"
+  },
+  {
     icon: "video",
     title: "AI漫剧自动化生产控制台",
-    subtitle: "Vibe Coding + AIGC Workflow",
-    description: "深度使用 Codex、Cursor、Tabbit、Coze、OpenClaw、Hermes 等 AI 工具，把 AI 漫剧的小说分析、资产确认、提示词生成和视频任务复盘串成可操作的本地控制台。",
+    subtitle: "AIGC Workflow",
+    description: "小说分析、资产确认、提示词和视频任务复盘的本地控制台。",
     role: "需求拆解、流程设计、Agent 规则、AI 协作开发、工具链验证、结果验收",
     value: "将零散 AIGC 生成步骤沉淀为可复盘的本地生产工具，支持多人物参考图、候选视频管理和失败状态回写",
+    tags: ["AIGC生产", "本地控制台", "任务复盘"],
     detailHref: "resume#resume-projects"
   },
   {
     icon: "growth",
-    title: "短视频账号内容运营",
-    subtitle: "Short Video Content Operations",
-    description: "结合小红书、抖音、YouTube 等平台内容经验，持续测试短视频选题、标题、封面和内容结构。",
-    role: "内容创作、平台运营、数据观察、选题优化",
-    value: "积累多平台内容判断和运营经验"
+    title: "个人 AI 知识库沉淀系统",
+    subtitle: "Knowledge System",
+    description: "把 AI 对话沉淀为每日复盘、项目经验和后续行动。",
+    role: "知识库结构设计、定时任务、会话分类、模型成本控制",
+    value: "把 AI 聊天从一次性对话变成可复盘、可检索、可长期积累的知识资产",
+    tags: ["Hermes", "Obsidian", "每日复盘"],
+    detailHref: "resume#resume-projects"
   }
 ];
 
-const profileTools = ["Codex", "Cursor", "Tabbit", "Coze", "OpenClaw", "Hermes", "GitHub", "Prompt", "AIGC视频", "即梦", "短视频运营"];
+const profileFutureDirection = {
+  title: "扩展方向：飞书 CLI 企业协作自动化"
+};
+
+const profileTools = ["Codex", "Cursor", "Hermes", "Obsidian", "Tabbit", "Coze", "OpenClaw", "GitHub", "飞书", "AIGC视频", "业务运营自动化"];
 const resumePdfHref = new URL("./assets/static/files/zhang-yuanbo-resume.pdf", import.meta.url).href;
 const resumePdfFileName = "张远博简历.pdf";
 const contactPhone = "17564138094";
@@ -430,7 +447,7 @@ export default function CandidateSystemPage(): JSX.Element {
                     <img src={avatarOrbAsset} alt="" />
                   </div>
                   <div className="profile-archive-name">张远博</div>
-                  <div className="profile-archive-role">AI内容运营 / AI落地</div>
+                  <div className="profile-archive-role">AI工作流落地 / 业务自动化</div>
                   <div className="profile-archive-meta">
                     <span className="profile-meta-item profile-meta-location">中国 · 杭州</span>
                     <span className="profile-meta-item profile-meta-mail">1425514532@qq.com</span>
@@ -455,7 +472,7 @@ export default function CandidateSystemPage(): JSX.Element {
                       <h2>个人简介</h2>
                     </div>
                     <p>
-                      AIGC视频项目实战经验的内容创作者，持续探索AI工作流自动化，能够结合短视频平台运营经验与Codex、Cursor等工具，提高内容生产效率和批量化交付能力。
+                      AIGC视频项目实战经验的 AI 工作流实践者，持续探索业务运营自动化，能够结合浏览器自动化、Codex、Hermes、Obsidian 等工具，提高运营、内容生产和知识沉淀效率。
                     </p>
                   </section>
 
@@ -483,54 +500,50 @@ export default function CandidateSystemPage(): JSX.Element {
                   </section>
 
                   <section className="profile-archive-section profile-archive-projects" aria-label="Project experience">
-                    <div className="profile-section-title">
+                    <div className="profile-section-title profile-project-section-title">
                       <span>03</span>
                       <h2>项目经历</h2>
+                      <em>{profileFutureDirection.title}</em>
                     </div>
                     <div className="profile-project-list">
-                      {profileProjects.map((project) => (
-                        <article className={`profile-project-card${project.detailHref ? " is-featured-project" : ""}`} key={project.title}>
-                          <div className={`profile-project-icon project-icon-${project.icon}`} aria-hidden="true" />
-                          <div className="profile-project-copy">
-                            <h3>{project.title}</h3>
-                            <span>{project.subtitle}</span>
-                            <p>{project.description}</p>
-                            {project.tags && (
-                              <div className="profile-project-tags" aria-label={`${project.title}关键标签`}>
-                                {project.tags.map((tag) => (
-                                  <span key={tag}>{tag}</span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          {!project.detailHref && (
-                            <div className="profile-project-meta">
-                              <div>
-                                <strong>我的角色</strong>
-                                <p>{project.role}</p>
-                              </div>
-                              <div>
-                                <strong>项目价值</strong>
-                                <p>{project.value}</p>
-                              </div>
+                      {profileProjects.map((project, index) => {
+                        const projectClassName = `profile-project-card is-entry-project${index === 0 ? " is-primary-project" : ""}`;
+
+                        return (
+                          <article className={projectClassName} key={project.title}>
+                            <div className={`profile-project-icon project-icon-${project.icon}`} aria-hidden="true" />
+                            <div className="profile-project-badge">
+                              <span>{index === 0 ? "主推" : "项目"}</span>
+                              <b>{String(index + 1).padStart(2, "0")}</b>
                             </div>
-                          )}
-                          {project.detailHref && (
+                            <div className="profile-project-copy">
+                              <h3>{project.title}</h3>
+                              <span>{project.subtitle}</span>
+                              <p>{project.description}</p>
+                              {project.tags && (
+                                <div className="profile-project-tags" aria-label={`${project.title}关键标签`}>
+                                  {project.tags.map((tag) => (
+                                    <span key={tag}>{tag}</span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                             <div className="profile-project-entry">
-                              <span>FEATURED PROJECT</span>
+                              <span>{index === 0 ? "MAIN SHOWCASE" : "PROJECT ENTRY"}</span>
                               <button
                                 className="profile-project-detail-button"
                                 type="button"
                                 disabled={resumeTransitionActive}
+                                aria-label={`查看${project.title}详情`}
                                 onClick={() => openProjectDetail(project.detailHref!)}
                               >
-                                查看详细项目
+                                查看
                                 <b aria-hidden="true">›</b>
                               </button>
                             </div>
-                          )}
-                        </article>
-                      ))}
+                          </article>
+                        );
+                      })}
                     </div>
                   </section>
                 </div>
