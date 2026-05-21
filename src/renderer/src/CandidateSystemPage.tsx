@@ -123,10 +123,10 @@ const profileProjects: ProfileProject[] = [
 ];
 
 const profileFutureDirection = {
-  title: "扩展方向：飞书 CLI 企业协作自动化"
+  title: "扩展方向：飞书 CLI 与企业协作 Agent 工作流"
 };
 
-const profileTools = ["Codex", "Cursor", "Hermes", "Obsidian", "Tabbit", "Coze", "OpenClaw", "GitHub", "飞书", "AIGC视频", "业务运营自动化"];
+const profileTools = ["Codex", "Cursor", "Hermes", "Obsidian", "Tabbit", "Coze", "OpenClaw", "GitHub", "飞书 CLI", "AIGC视频", "业务运营自动化"];
 const resumePdfHref = new URL("./assets/static/files/zhang-yuanbo-resume.pdf", import.meta.url).href;
 const resumePdfFileName = "张远博简历.pdf";
 const contactPhone = "17564138094";

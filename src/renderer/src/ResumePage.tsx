@@ -31,7 +31,26 @@ const resumePdfFileName = "张远博简历.pdf";
 const contactPhone = "17564138094";
 const profileOverviewHref = getAppRouteHref("profile");
 const aiComicConsoleGithubHref = "https://github.com/guawuchang07-dotcom/ai-comic-production-console";
-const automationDemoVideoHref = new URL("./assets/static/media/automation/boss-job-assistant-web.mp4", import.meta.url).href;
+
+type AutomationDemo = {
+  title: string;
+  description: string;
+  videoHref: string;
+};
+
+const automationDemos = {
+  selfMedia: {
+    title: "自媒体运营辅助脚本演示",
+    description: "自动化浏览器辅助内容识别、互动条件判断、评论草稿和执行状态记录",
+    videoHref: new URL("./assets/static/media/automation/self-media-ops-assistant.m4v", import.meta.url).href
+  },
+  boss: {
+    title: "BOSS 岗位线索收藏脚本演示",
+    description: "自动化浏览器与 AI Agent 辅助岗位筛选、收藏标记和流程状态记录",
+    videoHref: new URL("./assets/static/media/automation/boss-job-assistant-web.mp4", import.meta.url).href
+  }
+} satisfies Record<string, AutomationDemo>;
+
 const consoleScreenshots = [
   {
     title: "项目创建",
@@ -68,6 +87,22 @@ const difyKnowledgeScreenshots = [
   }
 ];
 
+const knowledgeBaseScreenshots = [
+  {
+    title: "Obsidian 知识库关系图谱",
+    description: "中文目录、每日沉淀、AI学习、项目经验和对话索引已经形成可视化链接。",
+    src: new URL("./assets/static/media/proof/obsidian-knowledge-graph.png", import.meta.url).href
+  }
+];
+
+const shortVideoScreenshots = {
+  douyin: {
+    title: "抖音数据中心截图",
+    description: "抖音账号诊断与经营数据截图，用于验证阶段性短视频播放和内容测试效果。",
+    src: new URL("./assets/static/media/proof/douyin-data-center.jpg", import.meta.url).href
+  }
+} satisfies Record<string, ImagePreview>;
+
 function getAppRouteHref(route = ""): string {
   const basePath = window.location.pathname
     .replace(/\/(?:resume|profile)\/?$/, "/")
@@ -95,10 +130,12 @@ type ProjectItem = {
   platforms?: string[];
   values: string[];
   proof?: string[];
+  screenshots?: ImagePreview[];
   metrics?: Array<{
     value: string;
     label: string;
     note?: string;
+    proof?: ImagePreview;
   }>;
 };
 
@@ -111,6 +148,7 @@ type AutomationCase = {
   value: string[];
   proof: string[];
   tags: string[];
+  demo?: AutomationDemo;
 };
 
 type ToolGroup = {
@@ -200,8 +238,9 @@ const automationCases: AutomationCase[] = [
     description: "面向自媒体运营中的重复互动动作，把目标内容识别、点赞、转发、评论草稿和执行状态记录拆成可控脚本流程。",
     actions: ["识别目标帖子与互动条件", "辅助点赞、转发、评论草稿生成", "记录已处理内容与执行状态", "保留人工确认与规则控制"],
     value: ["减少重复操作时间", "让内容互动动作更有节奏", "便于复盘哪些内容值得持续跟进"],
-    proof: ["已在自动化浏览器中跑通脚本", "定位为运营动作辅助，不做无规则刷量"],
-    tags: ["浏览器自动化", "自媒体运营", "状态记录", "人工确认"]
+    proof: ["已在自动化浏览器中跑通脚本", "已接入自媒体运营辅助演示视频", "定位为运营动作辅助，不做无规则刷量"],
+    tags: ["浏览器自动化", "自媒体运营", "状态记录", "人工确认"],
+    demo: automationDemos.selfMedia
   },
   {
     icon: Briefcase,
@@ -211,7 +250,8 @@ const automationCases: AutomationCase[] = [
     actions: ["按岗位关键词和方向筛选", "收藏符合条件的岗位", "减少人工重复翻页浏览", "沉淀岗位信息筛选规则"],
     value: ["提升岗位线索收集效率", "把个人求职流程抽象成业务线索筛选能力", "可迁移到销售线索、达人线索、竞品信息收集等场景"],
     proof: ["已接入自动化演示视频", "可在网页流程中展示收藏动作与状态变化"],
-    tags: ["BOSS直聘", "线索筛选", "网页自动化", "流程提效"]
+    tags: ["BOSS直聘", "线索筛选", "网页自动化", "流程提效"],
+    demo: automationDemos.boss
   },
   {
     icon: GitBranch,
@@ -224,6 +264,18 @@ const automationCases: AutomationCase[] = [
     tags: ["GitHub", "项目情报", "AI工具调研", "每日自动总结"]
   }
 ];
+
+function getAutomationDemoForItem(item: string): AutomationDemo | null {
+  if (item.includes("自媒体")) {
+    return automationDemos.selfMedia;
+  }
+
+  if (item.includes("岗位")) {
+    return automationDemos.boss;
+  }
+
+  return null;
+}
 
 const projects: ProjectItem[] = [
   {
@@ -267,7 +319,7 @@ const projects: ProjectItem[] = [
     title: "个人 AI 知识库与 Hermes 每日沉淀系统",
     subtitle: "Hermes + Obsidian + Codex",
     focus: "把 AI 对话转成每日复盘和知识资产",
-    summary: "用 Hermes 作为主要对话入口，每天 23:00 自动读取本地会话，分类识别闲聊、工作推进、AI学习、项目经验和待办，再写入 Obsidian 每日复盘。",
+    summary: "用 Hermes 作为主要对话入口，每天 23:00 自动整理本地会话，把工作推进、AI学习、项目经验和待办沉淀到 Obsidian，减少手动写日报、整理文档和回顾任务的时间，让日常沟通转化为可复盘、可检索的知识资产。",
     background:
       "项目背景：日常和 AI 对话很容易聊完即散，项目经验、学习内容和任务复盘无法沉淀。这个系统把聊天记录从“临时对话”转成可复盘、可检索、可持续更新的个人知识库。",
     responsibilities: [
@@ -282,8 +334,10 @@ const projects: ProjectItem[] = [
       "已生成 Obsidian 每日复盘笔记",
       "已配置每日 23:00 自动沉淀任务",
       "已支持桌宠多窗口聊天纳入每日总结",
-      "不保存原始对话，默认只沉淀摘要与可执行待办"
+      "不保存原始对话，默认只沉淀摘要与可执行待办",
+      "可查看 Obsidian 关系图谱与中文目录结构截图"
     ],
+    screenshots: knowledgeBaseScreenshots,
     values: [
       "把 AI 对话从一次性聊天变成可复盘的知识资产",
       "为项目经验、学习内容和个人画像建立长期沉淀入口",
@@ -299,28 +353,29 @@ const projects: ProjectItem[] = [
   },
   {
     icon: Wrench,
-    title: "飞书 CLI 企业协作自动化探索",
-    subtitle: "Feishu CLI / Team Workflow Automation",
-    focus: "企业协作工具接入 AI Agent 的预研方向",
-    summary: "围绕飞书文档、任务、知识库和团队协作场景，整理 CLI / API 使用方法，验证 AI Agent 能否帮助团队自动更新文档、生成日报和沉淀项目资料。",
+    title: "飞书 CLI 与企业协作 Agent 工作流探索",
+    subtitle: "Feishu CLI / Enterprise Agent Workflow",
+    focus: "会议、日程、文档、表格和待办的企业协作自动化预研",
+    summary: "围绕飞书 Agent 生态和飞书 CLI，拆解企业协作中的会议纪要、日程安排、文档更新、多维表格记录和日报复盘场景，探索外部 AI Agent 如何把分散办公动作串成可确认、可执行、可复盘的企业工作流。",
     background:
-      "项目背景：很多团队协作内容分散在飞书文档、任务和群聊中，人工更新和整理成本高。该方向用于探索把企业协作平台接入 AI 工作流的可能性。",
+      "项目背景：很多团队的会议结论、任务跟进、文档更新和表格维护分散在不同协作入口中，人工整理和跨部门同步成本高。该方向用于探索把企业协作平台接入 AI Agent，让重复办公动作具备自动化入口。",
     responsibilities: [
-      "整理飞书 CLI / API 的基础使用方法和适用边界",
-      "梳理文档创建、内容更新、任务记录、日报生成等高频场景",
-      "设计 AI Agent 调用企业协作工具的安全规则和人工确认节点",
-      "为后续团队级知识库、日报、项目复盘自动化预留接口"
+      "梳理 Aily、妙搭、多维表格 Agent、飞书 CLI 的适用场景和能力边界",
+      "设计“语音 / 会议记录 -> 待办拆解 -> 日程 / 文档 / 表格更新”的自动化流程",
+      "把审批、信息收集、项目管理等业务需求拆成低代码工具和 Agent 执行方案",
+      "规划企业协作 Agent 的授权范围、人工确认、数据边界和失败兜底机制"
     ],
-    tools: ["飞书", "CLI", "API", "Hermes", "Codex", "Markdown"],
-    proof: ["进行中：正在整理飞书 CLI 使用方法", "目标是验证企业协作工具自动化，不以复杂后端系统为第一阶段目标"],
+    tools: ["飞书", "飞书 CLI", "Aily", "妙搭", "多维表格", "Hermes", "Codex"],
+    proof: ["预研中：已完成飞书 Agent 生态和 CLI 场景拆解", "覆盖会议、日程、文档、表格、待办等高频协作动作", "强调关键写入前人工确认，避免无控制自动执行"],
     values: [
-      "把个人自动化经验迁移到企业协作场景",
-      "让日报、文档更新、项目复盘等重复协作动作具备自动化入口",
-      "为业务团队落地 AI Agent 提供更贴近真实办公场景的案例"
+      "降低业务团队搭建内部工具和自动化流程的门槛",
+      "减少会议纪要、日报、任务跟进和表格维护中的重复劳动",
+      "把个人 AI 工作流经验迁移到企业组织效能场景",
+      "让人负责目标设定、规则管理和结果确认，Agent 负责重复执行动作"
     ],
     metrics: [
-      { value: "进行中", label: "项目阶段", note: "CLI 用法整理" },
-      { value: "文档", label: "重点场景", note: "日报 / 复盘 / 知识库" },
+      { value: "4类", label: "Agent 入口", note: "Aily / 妙搭 / 多维表格 / CLI" },
+      { value: "5项", label: "协作动作", note: "会议 / 日程 / 文档 / 表格 / 待办" },
       { value: "确认制", label: "安全策略", note: "关键写入前人工确认" }
     ]
   },
@@ -329,17 +384,22 @@ const projects: ProjectItem[] = [
     title: "短视频账号内容运营",
     subtitle: "Short Video Content Operations",
     focus: "多平台内容测试与复盘",
-    summary: "围绕小红书、抖音、YouTube 持续测试选题、标题、封面和内容结构，用数据反馈优化内容方向。",
-    background: "基于多平台内容发布经验，持续测试不同内容方向、标题、封面、选题和视频结构。",
+    summary: "围绕小红书、抖音、YouTube 持续测试选题、标题、封面和内容结构，后台截图显示抖音播放 60 万+、YouTube 观看 8 万+，用数据反馈迭代内容方向。",
+    background: "基于多平台内容发布经验，持续测试不同内容方向、标题、封面、选题和视频结构，把播放量、互动和平台反馈转化为下一轮内容优化依据。",
     responsibilities: ["短视频内容创作", "选题策划与脚本组织", "标题 / 封面 / 内容结构测试", "平台数据观察", "内容方向迭代", "多平台发布与复盘"],
     platforms: ["小红书", "抖音", "YouTube", "TikTok"],
-    proof: ["小红书近 30 日浏览量 7 万+", "抖音内容浏览量破百万，累计点赞约 1.2 万", "YouTube 浏览量 5 万+", "数据来自个人运营账号阶段性统计，用于说明内容测试和平台反馈经验"],
+    proof: [
+      "抖音数据中心截图：阶段播放 60 万+，账号诊断超过同类作者",
+      "YouTube Studio 截图：观看 8 万+，观看时长 180 小时+",
+      "小红书近 30 日浏览量 7 万+",
+      "数据来自个人运营账号阶段性统计，用于说明内容测试和平台反馈经验"
+    ],
     values: ["积累多平台内容判断和运营经验", "能够结合数据反馈调整选题与结构", "对短视频内容节奏和爆款结构有实操理解"],
     metrics: [
-      { value: "百万+", label: "全网内容总览", note: "抖音内容浏览破百万" },
-      { value: "7万+", label: "小红书近 30 日浏览", note: "短周期内容验证" },
-      { value: "1.2万+", label: "累计点赞", note: "抖音互动数据" },
-      { value: "5万+", label: "YouTube 浏览", note: "跨平台分发经验" }
+      { value: "60万+", label: "抖音播放验证", note: "数据中心截图", proof: shortVideoScreenshots.douyin },
+      { value: "8万+", label: "YouTube 观看", note: "YouTube Studio 截图" },
+      { value: "百万+", label: "抖音内容浏览", note: "账号阶段性数据" },
+      { value: "7万+", label: "小红书近 30 日浏览", note: "短周期内容验证" }
     ]
   }
 ];
@@ -386,7 +446,7 @@ const toolGroups: ToolGroup[] = [
   { title: "知识库与项目情报", subtitle: "用于每日沉淀、GitHub 项目总结和方法论复盘", tools: ["Obsidian", "Hermes cron", "GitHub", "Markdown", "Python"] },
   { title: "AIGC 视频 / 图像工具", subtitle: "用于生图、生视频和提示词迭代", tools: ["即梦", "Seedance", "Midjourney", "ComfyUI"] },
   { title: "内容生产 / 剪辑工具", subtitle: "完成剪辑、包装和成片交付", tools: ["剪映", "CapCut"] },
-  { title: "文档 / 平台经验", subtitle: "沉淀流程、复盘记录、内容发布和数据反馈", tools: ["飞书", "Notion", "Excel", "抖音", "小红书", "YouTube", "TikTok"] }
+  { title: "文档 / 平台经验", subtitle: "沉淀流程、企业协作、内容发布和数据反馈", tools: ["飞书 CLI", "飞书多维表格", "Notion", "Excel", "抖音", "小红书", "YouTube", "TikTok"] }
 ];
 
 const workflowSteps = ["业务场景识别", "规则拆解", "脚本 / Agent 执行", "状态记录", "结果复盘", "知识沉淀"];
@@ -446,7 +506,7 @@ function CapabilityCard({
 }: {
   group: CapabilityGroup;
   index: number;
-  onAutomationDemo: () => void;
+  onAutomationDemo: (demo: AutomationDemo) => void;
 }): JSX.Element {
   const Icon = group.icon;
   const shouldShowAutomationDemo = group.title === "业务运营自动化";
@@ -463,24 +523,37 @@ function CapabilityCard({
         </div>
       </div>
       <ul>
-        {group.items.map((item) => (
-          <li className={shouldShowAutomationDemo && item.includes("岗位") ? "has-demo-action" : undefined} key={item}>
-            <CheckCircle2 size={14} aria-hidden="true" />
-            <span>{item}</span>
-            {shouldShowAutomationDemo && item.includes("岗位") && (
-              <button className="resume-capability-demo-button" type="button" onClick={onAutomationDemo}>
-                查看演示
-              </button>
-            )}
-          </li>
-        ))}
+        {group.items.map((item) => {
+          const demo = shouldShowAutomationDemo ? getAutomationDemoForItem(item) : null;
+
+          return (
+            <li className={demo ? "has-demo-action" : undefined} key={item}>
+              <CheckCircle2 size={14} aria-hidden="true" />
+              <span>{item}</span>
+              {demo && (
+                <button className="resume-capability-demo-button" type="button" onClick={() => onAutomationDemo(demo)}>
+                  查看演示
+                </button>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </article>
   );
 }
 
-function AutomationCaseCard({ item, index }: { item: AutomationCase; index: number }): JSX.Element {
+function AutomationCaseCard({
+  item,
+  index,
+  onAutomationDemo
+}: {
+  item: AutomationCase;
+  index: number;
+  onAutomationDemo: (demo: AutomationDemo) => void;
+}): JSX.Element {
   const Icon = item.icon;
+  const demo = item.demo;
   return (
     <article className="resume-ops-card">
       <div className="resume-ops-card-head">
@@ -513,6 +586,12 @@ function AutomationCaseCard({ item, index }: { item: AutomationCase; index: numb
           <span key={proof}>{proof}</span>
         ))}
       </div>
+      {demo && (
+        <button className="resume-ops-demo-button" type="button" onClick={() => onAutomationDemo(demo)}>
+          <PlayCircle size={15} aria-hidden="true" />
+          查看演示视频
+        </button>
+      )}
       <div className="resume-ops-tags">
         {item.tags.map((tag) => (
           <span key={tag}>{tag}</span>
@@ -561,6 +640,20 @@ function ProjectCard({
               <strong>{metric.value}</strong>
               <span>{metric.label}</span>
               {metric.note && <p>{metric.note}</p>}
+              {metric.proof && (
+                <button
+                  type="button"
+                  className="resume-metric-proof-button"
+                  onClick={() => {
+                    if (metric.proof) {
+                      onImagePreview(metric.proof);
+                    }
+                  }}
+                >
+                  <Search size={13} aria-hidden="true" />
+                  查看截图
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -642,6 +735,29 @@ function ProjectCard({
                 </figure>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {project.screenshots && (
+        <div className="resume-project-proof-media" aria-label={`${project.title}证据截图`}>
+          <div className="resume-console-screenshots-head">
+            <span>PROOF SCREENS</span>
+            <strong>证据截图</strong>
+          </div>
+          <div className="resume-project-proof-grid">
+            {project.screenshots.map((shot) => (
+              <figure className="resume-project-proof-card" key={shot.title}>
+                <button type="button" onClick={() => onImagePreview(shot)} aria-label={`放大查看 ${shot.title}`}>
+                  <img src={shot.src} alt={`${project.title} - ${shot.title}`} loading="lazy" />
+                  <span>点击放大</span>
+                </button>
+                <figcaption>
+                  <strong>{shot.title}</strong>
+                  <span>{shot.description}</span>
+                </figcaption>
+              </figure>
+            ))}
           </div>
         </div>
       )}
@@ -764,7 +880,7 @@ function DirectorWorkCard({
 
 export default function ResumePage(): JSX.Element {
   const [activeDirectorWork, setActiveDirectorWork] = useState<DirectorWork | null>(null);
-  const [automationDemoOpen, setAutomationDemoOpen] = useState(false);
+  const [activeAutomationDemo, setActiveAutomationDemo] = useState<AutomationDemo | null>(null);
   const [activeImagePreview, setActiveImagePreview] = useState<ImagePreview | null>(null);
 
   function downloadResumeFile(): void {
@@ -931,7 +1047,7 @@ export default function ResumePage(): JSX.Element {
         </div>
         <div className="resume-capability-grid">
           {capabilityGroups.map((group, index) => (
-            <CapabilityCard group={group} index={index} onAutomationDemo={() => setAutomationDemoOpen(true)} key={group.title} />
+            <CapabilityCard group={group} index={index} onAutomationDemo={setActiveAutomationDemo} key={group.title} />
           ))}
         </div>
       </section>
@@ -941,7 +1057,7 @@ export default function ResumePage(): JSX.Element {
           <SectionKicker index="04" label="Business Automation Lab" />
           <h2 id="resume-ops-title">业务运营自动化脚本集</h2>
           <p>
-            这部分放在前面，是因为它最能体现“业务提效”价值：把运营中高频、重复、可规则化的网页动作，做成可演示、可记录、可复盘的半自动流程。
+            这组工具面向自媒体运营、岗位筛选和项目调研中的高频重复网页操作，把人工点击、筛选、记录和复盘整理成可演示的自动化流程，减少重复劳动，提高运营和信息收集效率。
           </p>
         </div>
         <div className="resume-ops-overview" aria-label="业务运营自动化整体流程">
@@ -964,7 +1080,7 @@ export default function ResumePage(): JSX.Element {
         </div>
         <div className="resume-ops-grid">
           {automationCases.map((item, index) => (
-            <AutomationCaseCard item={item} index={index} key={item.title} />
+            <AutomationCaseCard item={item} index={index} onAutomationDemo={setActiveAutomationDemo} key={item.title} />
           ))}
         </div>
       </section>
@@ -987,7 +1103,7 @@ export default function ResumePage(): JSX.Element {
           <SectionKicker index="06" label="Agent Tool Research" />
           <h2 id="resume-ai-extension-title">AI Agent 工具调研与自动化验证</h2>
           <p>
-            这部分不是单纯工具体验，而是围绕网页自动化、任务拆解、文件处理和本地工作流，验证不同 AI Agent 工具的适用边界，并判断它们能否服务真实内容生产任务。
+            这部分关注 AI Agent 能不能真正提升工作效率：围绕网页自动化、任务拆解、文件处理和本地工作流，验证不同工具能否减少重复操作、缩短任务处理时间，并服务真实内容生产与运营提效。
           </p>
         </div>
         <div className="resume-ai-extension-grid">
@@ -1184,33 +1300,26 @@ export default function ResumePage(): JSX.Element {
           </div>
         </div>
       )}
-      {automationDemoOpen && (
+      {activeAutomationDemo && (
         <div
           className="resume-video-modal"
           role="dialog"
           aria-modal="true"
-          aria-label="AI 自动化能力演示"
-          onClick={() => setAutomationDemoOpen(false)}
+          aria-label={activeAutomationDemo.title}
+          onClick={() => setActiveAutomationDemo(null)}
         >
           <div className="resume-video-modal-panel" onClick={(event) => event.stopPropagation()}>
             <div className="resume-video-modal-head">
               <div>
                 <span>AI AUTOMATION PROOF</span>
-                <h3>网页任务自动化演示</h3>
-                <p>自动化浏览器与 AI Agent 辅助岗位筛选、收藏标记和流程状态记录</p>
+                <h3>{activeAutomationDemo.title}</h3>
+                <p>{activeAutomationDemo.description}</p>
               </div>
-              <button type="button" onClick={() => setAutomationDemoOpen(false)} aria-label="关闭演示">
+              <button type="button" onClick={() => setActiveAutomationDemo(null)} aria-label="关闭演示">
                 <X size={18} aria-hidden="true" />
               </button>
             </div>
-            {automationDemoVideoHref ? (
-              <video className="resume-video-modal-player" src={automationDemoVideoHref} controls preload="metadata" />
-            ) : (
-              <div className="resume-automation-placeholder">
-                <strong>视频待接入</strong>
-                <p>把录制好的演示视频发给我后，我会接入到这里。</p>
-              </div>
-            )}
+            <video className="resume-video-modal-player" src={activeAutomationDemo.videoHref} controls preload="metadata" />
           </div>
         </div>
       )}

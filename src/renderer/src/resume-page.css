@@ -1247,6 +1247,31 @@ body:has(.resume-page) {
   background: rgba(21, 247, 255, 0.055);
 }
 
+.resume-ops-demo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  margin-top: 12px;
+  padding: 0 14px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(21, 247, 255, 0.42);
+  background:
+    linear-gradient(90deg, rgba(21, 247, 255, 0.14), rgba(255, 77, 255, 0.1)),
+    rgba(4, 18, 42, 0.8);
+  cursor: pointer;
+}
+
+.resume-ops-demo-button:hover,
+.resume-ops-demo-button:focus-visible {
+  color: var(--resume-cyan);
+  border-color: rgba(21, 247, 255, 0.86);
+}
+
 .resume-ops-tags {
   display: flex;
   flex-wrap: wrap;
@@ -1567,7 +1592,7 @@ body:has(.resume-page) {
 }
 
 .resume-project-metric {
-  min-height: 98px;
+  min-height: 116px;
   padding: 15px 16px;
   border: 1px solid rgba(21, 247, 255, 0.18);
   background:
@@ -1598,6 +1623,35 @@ body:has(.resume-page) {
   color: #93afd1;
   font-size: 12px;
   line-height: 1.45;
+}
+
+.resume-metric-proof-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  margin-top: 10px;
+  padding: 0 10px;
+  border: 1px solid rgba(21, 247, 255, 0.45);
+  background: rgba(21, 247, 255, 0.08);
+  color: #dffcff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.resume-metric-proof-button:hover,
+.resume-metric-proof-button:focus-visible {
+  border-color: rgba(255, 77, 255, 0.72);
+  background: rgba(255, 77, 255, 0.14);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 .resume-console-showcase {
@@ -1948,6 +2002,101 @@ body:has(.resume-page) {
 }
 
 .resume-dify-proof-card figcaption span {
+  color: #a9c1e4;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.resume-project-proof-media {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(21, 247, 255, 0.16);
+  background:
+    radial-gradient(circle at 88% 10%, rgba(21, 247, 255, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(6, 18, 43, 0.72), rgba(4, 11, 29, 0.76));
+}
+
+.resume-project-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.resume-project-proof-card {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid rgba(21, 247, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(9, 20, 49, 0.68), rgba(4, 11, 29, 0.72)),
+    rgba(3, 12, 31, 0.58);
+  overflow: hidden;
+}
+
+.resume-project-proof-card button {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.resume-project-proof-card button span {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 5px 8px;
+  border: 1px solid rgba(21, 247, 255, 0.3);
+  background: rgba(3, 8, 24, 0.74);
+  color: #e7fbff;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.resume-project-proof-card button:hover span,
+.resume-project-proof-card button:focus-visible span {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(255, 77, 255, 0.46);
+}
+
+.resume-project-proof-card button:hover img,
+.resume-project-proof-card button:focus-visible img {
+  filter: brightness(1.08) saturate(1.08);
+}
+
+.resume-project-proof-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top left;
+  border-bottom: 1px solid rgba(21, 247, 255, 0.12);
+}
+
+.resume-project-proof-card figcaption {
+  display: grid;
+  gap: 5px;
+  padding: 12px 13px 14px;
+}
+
+.resume-project-proof-card figcaption strong {
+  color: #ffffff;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+
+.resume-project-proof-card figcaption span {
   color: #a9c1e4;
   font-size: 12px;
   line-height: 1.55;
