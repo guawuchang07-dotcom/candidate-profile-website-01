@@ -7,7 +7,7 @@ const distDir = resolve(__dirname, "dist");
 
 export default defineConfig({
   root: resolve(__dirname, "src/renderer"),
-  base: "./",
+  base: "/",
   plugins: [
     react(),
     {
