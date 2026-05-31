@@ -14,9 +14,15 @@ export default defineConfig({
       name: "static-hosting-extras",
       writeBundle() {
         const assetsDir = resolve(distDir, "assets");
+        const profileDir = resolve(distDir, "profile");
+        const resumeDir = resolve(distDir, "resume");
         mkdirSync(assetsDir, { recursive: true });
+        mkdirSync(profileDir, { recursive: true });
+        mkdirSync(resumeDir, { recursive: true });
         copyFileSync(resolve(__dirname, "src/renderer/src/assets/static/favicon.svg"), resolve(assetsDir, "favicon.svg"));
         copyFileSync(resolve(distDir, "index.html"), resolve(distDir, "404.html"));
+        copyFileSync(resolve(distDir, "index.html"), resolve(profileDir, "index.html"));
+        copyFileSync(resolve(distDir, "index.html"), resolve(resumeDir, "index.html"));
         writeFileSync(resolve(distDir, "robots.txt"), "User-agent: *\nAllow: /\n", "utf8");
         writeFileSync(resolve(distDir, "_redirects"), "/* /index.html 200\n", "utf8");
         writeFileSync(
