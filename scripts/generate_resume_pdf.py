@@ -25,10 +25,13 @@ from reportlab.platypus import (
 
 ROOT = Path(__file__).resolve().parents[1]
 PDF_PATH = ROOT / "src/renderer/src/assets/static/files/zhang-yuanbo-resume.pdf"
-DOWNLOAD_PDF_PATH = Path("/Users/guawuchang/Library/Containers/com.tencent.qq/Data/Downloads/张远博简历_AI应用落地版.pdf")
+DOWNLOAD_PDF_PATH = Path.home() / "Downloads" / "张远博简历_AI应用落地版_电商项目_修订版_居中.pdf"
 
-FONT_REGULAR = "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
-FONT_BOLD = "/System/Library/Fonts/STHeiti Medium.ttc"
+FONT_CANDIDATES = [
+    ("C:/Windows/Fonts/msyh.ttc", "C:/Windows/Fonts/msyhbd.ttc"),
+    ("C:/Windows/Fonts/simhei.ttf", "C:/Windows/Fonts/simhei.ttf"),
+    ("/System/Library/Fonts/Supplemental/Arial Unicode.ttf", "/System/Library/Fonts/STHeiti Medium.ttc"),
+]
 
 PAGE_WIDTH, PAGE_HEIGHT = A4
 MARGIN_X = 15 * mm
@@ -42,8 +45,12 @@ LINE = colors.HexColor("#D7E2EA")
 
 
 def register_fonts() -> None:
-    pdfmetrics.registerFont(TTFont("ResumeCN", FONT_REGULAR))
-    pdfmetrics.registerFont(TTFont("ResumeCN-Bold", FONT_BOLD))
+    for regular, bold in FONT_CANDIDATES:
+        if Path(regular).exists() and Path(bold).exists():
+            pdfmetrics.registerFont(TTFont("ResumeCN", regular))
+            pdfmetrics.registerFont(TTFont("ResumeCN-Bold", bold))
+            return
+    raise FileNotFoundError("No supported Chinese fonts found for PDF generation.")
 
 
 def make_styles() -> dict[str, ParagraphStyle]:
@@ -168,6 +175,7 @@ def make_styles() -> dict[str, ParagraphStyle]:
             fontSize=7.2,
             leading=9.2,
             textColor=MUTED,
+            alignment=TA_CENTER,
             wordWrap="CJK",
         ),
         "footer": ParagraphStyle(
@@ -251,7 +259,7 @@ def migration_value_table(styles: dict[str, ParagraphStyle]) -> Table:
         ["能力方向", "已验证证据", "可迁移企业场景"],
         ["知识沉淀", "Hermes 每日复盘、Obsidian 关系图谱、项目经验沉淀样例", "员工日报、会议纪要、客户沟通记录、新人培训知识库"],
         ["流程自动化", "自媒体运营、岗位线索收藏、GitHub 项目情报脚本可演示", "销售线索筛选、招聘初筛、竞品监控、渠道信息收集"],
-        ["内容生产流程化", "AIGC 控制台原型、120min 级 AI 漫剧交付经验", "教育短视频、电商素材、品牌内容、投放素材多版本测试"],
+        ["内容生产流程化", "电商主图工作流、AIGC 控制台原型、120min 级 AI 漫剧交付经验", "服装电商主图、宣传视频、教育短视频、品牌内容、投放素材多版本测试"],
         ["协作工具接入", "飞书 CLI / 多维表格 / 企业 Agent 场景预研", "会议待办、日程安排、文档更新、表格沉淀前的人工确认流程"],
     ]
     flowable_rows = []
@@ -280,10 +288,10 @@ def migration_value_table(styles: dict[str, ParagraphStyle]) -> Table:
 
 def metric_table(styles: dict[str, ParagraphStyle]) -> Table:
     metrics = [
+        ("电商视觉工作流", "主图批量生成 + 图生视频"),
         ("AI 漫剧交付", "多部 120min 级项目"),
-        ("知识沉淀", "Hermes + Obsidian 每日复盘"),
         ("业务自动化", "自媒体 / 岗位 / GitHub 脚本"),
-        ("内容数据", "抖音 60万+ / YouTube 8万+"),
+        ("知识沉淀", "Hermes + Obsidian 每日复盘"),
     ]
     cells = []
     for title, value in metrics:
@@ -338,7 +346,7 @@ def page_footer(canvas, doc) -> None:
     canvas.line(MARGIN_X, 8.5 * mm, PAGE_WIDTH - MARGIN_X, 8.5 * mm)
     canvas.setFont("ResumeCN", 7)
     canvas.setFillColor(colors.HexColor("#7A8794"))
-    canvas.drawCentredString(PAGE_WIDTH / 2, 5.3 * mm, f"张远博｜AI 应用落地 / 企业提效 / AIGC 工作流｜第 {doc.page} 页")
+    canvas.drawCentredString(PAGE_WIDTH / 2, 5.3 * mm, f"张远博｜AI 应用落地 / 电商视觉工作流 / AIGC 业务提效｜第 {doc.page} 页")
     canvas.restoreState()
 
 
@@ -347,9 +355,10 @@ def build_story(styles: dict[str, ParagraphStyle]) -> list:
     story.extend(
         [
             p("张远博", styles["name"]),
-            p("AI 应用落地 / 企业提效 / AIGC 工作流实践者", styles["role"]),
+            p("AI 应用落地 / 电商视觉工作流 / AIGC 业务提效实践者", styles["role"]),
             p("25 岁｜杭州｜17564138094｜1425514532@qq.com｜可到岗：随时", styles["contact"]),
-            p("个人网站：https://candidate-profile-website-01.pages.dev/｜GitHub：guawuchang07-dotcom/candidate-profile-website-01", styles["contact"]),
+            p("个人网站：https://candidate-profile-website-01.pages.dev/", styles["contact"]),
+            p("GitHub：guawuchang07-dotcom/candidate-profile-website-01", styles["contact"]),
             Spacer(1, 4),
             metric_table(styles),
         ]
@@ -358,7 +367,7 @@ def build_story(styles: dict[str, ParagraphStyle]) -> list:
     story.extend(section("求职定位", styles))
     story.append(
         callout(
-            "目标方向：AI 应用落地、企业内部提效、AI Agent 工作流、AIGC 内容生产流程。"
+            "目标方向：AI 应用落地、电商视觉素材生产提效、企业内部提效、AI Agent 工作流、AIGC 内容生产流程。"
             "我的优势不是单纯做工具展示，而是把真实重复业务拆成“场景识别 → 规则定义 → Agent / 脚本执行 → 人工确认 → 状态记录 → 复盘沉淀”的可演示工作流。",
             styles,
         )
@@ -368,6 +377,7 @@ def build_story(styles: dict[str, ParagraphStyle]) -> list:
     story.append(
         bullets(
             [
+                "电商视觉工作流落地：可把平台要求、服装类型、风格方向、主图候选和宣传视频延展整理成可配置、可演示的半自动流程。",
                 "AIGC 内容生产落地：有 120min 级 AI 漫剧项目交付经验，熟悉剧本拆解、分镜、Prompt、生成、剪辑、QC 和版本复盘。",
                 "企业提效原型验证：围绕知识沉淀、业务运营自动化、内容生产流程化搭建可演示 MVP，强调可记录、可复盘和人工确认边界。",
                 "AI 工具协作能力：使用 Codex、Cursor、Hermes、Obsidian、浏览器自动化等工具，把个人重复流程转成可迁移的企业提效场景。",
@@ -378,6 +388,19 @@ def build_story(styles: dict[str, ParagraphStyle]) -> list:
     )
 
     story.extend(section("AI 落地项目 / MVP", styles))
+    story.append(
+        project_block(
+            "服装电商主图与宣传视频生成工作流",
+            "Codex / AIGC 生图 / 图生视频｜2026.05 - 至今｜状态：主图批量生成、人工筛选、图生视频链路已验证",
+            [
+                "针对服装电商上新频繁、主图和短视频素材准备重复的问题，把平台调性、服装类型、风格方向和视觉卖点整理成结构化输入。",
+                "搭建批量生成流程，让同一商品方向一次产出多张主图候选，保留人工筛选和反馈，避免盲目生成。",
+                "将选中的电商主图继续延展为宣传视频素材，验证从静态商品图到短视频投放素材的完整链路。",
+                "项目价值：对标 AI 商拍降本提效方向，把视觉素材准备从单次手工生成改成可配置、可批量、可复盘的工作流。",
+            ],
+            styles,
+        )
+    )
     story.append(
         project_block(
             "企业知识沉淀 Agent 原型",
@@ -434,7 +457,7 @@ def build_story(styles: dict[str, ParagraphStyle]) -> list:
             [
                 "负责 AI 漫剧项目导演与统筹执行，参与脚本拆解、分镜设计、镜头语言规划、生成策略制定和成片 QC。",
                 "围绕角色一致性、镜头稳定、场景衔接、字幕体系和剪辑节奏持续优化制作标准，降低返工并保障观感连续。",
-                "参与多部 120min 级长篇 AI 漫剧交付，包括《诡异：给你烧个核动力马，你喊我爹？》《来吞：圣子归来》《系统说我大限将至，我反手立地成仙》。",
+                "参与多部 120min 级长篇 AI 漫剧交付，包括《诡异：给你烧个核动力马，你喊我爹？》《来吞：圣子归来》《系统说我大限将至，我反手立地成仙》；近期了解到这些作品在红果平台平均热度约 700 万左右。",
                 "使用 Codex、Cursor 等工具优化重复性流程，并尝试 Agent 群聊协同进行任务分工与信息同步。",
             ],
             styles,
@@ -525,17 +548,9 @@ def build_story(styles: dict[str, ParagraphStyle]) -> list:
     story.append(
         bullets(
             [
-                "个人网站可展示：AI 工作流落地案例、业务自动化脚本演示、Obsidian 知识库截图、AIGC 控制台截图和代表视频作品。",
-                "面试可讲重点：企业知识沉淀 Agent、业务运营自动化脚本集、AIGC 内容生产工作流控制台，以及后续 HR 招聘流程 Agent MVP 规划。",
+                "个人网站可展示：服装电商主图工作流、AI 工作流落地案例、业务自动化脚本演示、Obsidian 知识库截图、AIGC 控制台截图和代表视频作品。",
             ],
             styles["bullet"],
-        )
-    )
-    story.append(Spacer(1, 4))
-    story.append(
-        p(
-            "说明：简历中的 AI Agent / 自动化项目按 MVP 和原型验证口径描述，未包装为成熟企业级系统；当前重点是验证业务流程拆解、自动化执行、人工确认和复盘沉淀能力。",
-            styles["small"],
         )
     )
     return story

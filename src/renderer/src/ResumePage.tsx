@@ -51,6 +51,26 @@ const automationDemos = {
   }
 } satisfies Record<string, AutomationDemo>;
 
+const ecommerceWorkflowVideoHref = new URL("./assets/static/media/ecommerce/ecommerce-workflow-demo.mp4", import.meta.url).href;
+
+const ecommerceScreenshots: ImagePreview[] = [
+  {
+    title: "工作流配置界面",
+    description: "平台选择、服装类型、风格方向和生成参数配置，支持结构化输入和批量生成。",
+    src: new URL("./assets/static/media/ecommerce/workflow-config.png", import.meta.url).href
+  },
+  {
+    title: "批量主图生成结果",
+    description: "同一商品方向生成的多张主图候选，支持人工筛选和反馈，避免盲目生成。",
+    src: new URL("./assets/static/media/ecommerce/batch-images.png", import.meta.url).href
+  },
+  {
+    title: "图生视频延展",
+    description: "基于选中主图生成的宣传视频素材，验证从静态商品图到短视频投放的完整链路。",
+    src: new URL("./assets/static/media/ecommerce/video-generation.png", import.meta.url).href
+  }
+];
+
 const consoleScreenshots = [
   {
     title: "项目创建",
@@ -119,6 +139,7 @@ type CapabilityGroup = {
 };
 
 type ProjectItem = {
+  kind?: "comicConsole" | "ecommerce";
   icon: LucideIcon;
   title: string;
   subtitle: string;
@@ -131,6 +152,11 @@ type ProjectItem = {
   values: string[];
   proof?: string[];
   screenshots?: ImagePreview[];
+  demoVideo?: {
+    title: string;
+    description: string;
+    videoHref: string;
+  };
   metrics?: Array<{
     value: string;
     label: string;
@@ -175,15 +201,16 @@ type ImagePreview = {
   src: string;
 };
 
-const targetKeywords = ["业务运营自动化", "AIGC流程控制", "知识库沉淀"];
+const targetKeywords = ["电商视觉工作流", "业务运营自动化", "AIGC流程控制"];
 
 const heroProofItems = [
+  "服装电商主图与宣传视频生成工作流：平台、服装类型、风格方向到批量视觉素材",
   "业务运营自动化脚本集：自媒体运营、岗位线索、GitHub 情报",
   "AIGC 生产控制台：小说分析、资产确认、视频任务复盘",
   "AI 知识库沉淀系统：Hermes + Obsidian 每日复盘"
 ];
 
-const aboutFocusItems = ["业务运营自动化", "AIGC 内容生产流程", "AI Agent 工具落地", "个人知识库沉淀"];
+const aboutFocusItems = ["电商视觉工作流", "业务运营自动化", "AIGC 内容生产流程", "AI Agent 工具落地"];
 
 const independentScopes = [
   "浏览器自动化脚本设计与调试",
@@ -207,7 +234,7 @@ const collaborationScopes = [
   "高稳定性部署与监控"
 ];
 
-const targetIndustries = ["AI应用公司", "AIGC内容公司", "业务运营团队", "短视频 / 内容平台", "AI工具团队", "AI Agent / 工作流团队"];
+const targetIndustries = ["电商品牌 / 服装品牌", "AI应用公司", "AIGC内容公司", "业务运营团队", "短视频 / 内容平台", "AI工具团队", "AI Agent / 工作流团队"];
 
 const capabilityGroups: CapabilityGroup[] = [
   {
@@ -220,7 +247,7 @@ const capabilityGroups: CapabilityGroup[] = [
     icon: Bot,
     title: "AIGC生产流程",
     subtitle: "AI Production Workflow",
-    items: ["小说到视频任务拆解", "脚本 / 分镜 / 提示词设计", "生图 / 生视频链路验证", "失败原因与候选版本管理"]
+    items: ["电商主图批量生成", "宣传视频延展", "小说到视频任务拆解", "生图 / 生视频链路验证"]
   },
   {
     icon: Database,
@@ -279,6 +306,52 @@ function getAutomationDemoForItem(item: string): AutomationDemo | null {
 
 const projects: ProjectItem[] = [
   {
+    kind: "ecommerce",
+    icon: Layers,
+    title: "服装电商主图与宣传视频生成工作流",
+    subtitle: "E-commerce Main Image + Promo Video AIGC Workflow",
+    focus: "降低服装电商视觉素材成本，提升上架和投放效率",
+    summary:
+      "针对服装电商商拍成本高、上新素材准备重复的痛点，把平台要求、服装类型、风格方向整理成可配置输入，批量生成电商主图候选，并延展为宣传视频素材，对标 AI 商拍降本提效场景。",
+    background:
+      "项目背景：服装电商上新频繁，主图、风格测试和短视频素材准备都需要反复找参考、写提示词、出图筛选和视频延展，适合用 AI 工作流降低重复素材准备成本、缩短上架准备周期。",
+    responsibilities: [
+      "拆解服装电商主图生产流程，把平台调性、服装类型、风格方向、视觉卖点整理成结构化输入",
+      "设计批量生成链路，让同一商品方向一次产出多张主图候选，快速测试不同视觉风格和平台适配性",
+      "保留人工筛选和反馈环节，判断主图是否符合平台调性、服装风格和转化展示需求，避免盲目生成",
+      "将通过筛选的电商主图延展为宣传视频素材，验证从静态商品图到短视频投放素材的完整链路",
+      "用 AI 协作开发方式搭建可演示工作流，把原本分散在对话和生成工具里的操作整理成可复用 SOP"
+    ],
+    tools: ["Codex", "Cursor", "AIGC 生图工具", "图生视频工具", "Prompt 规则库", "工作流原型", "人工筛选反馈"],
+    screenshots: ecommerceScreenshots,
+    demoVideo: {
+      title: "电商主图与视频生成工作流演示",
+      description: "展示从平台选择、服装类型配置到批量主图生成、图生视频延展的完整流程",
+      videoHref: ecommerceWorkflowVideoHref
+    },
+    proof: [
+      "工作流原型已跑通：用 Codex 搭建配置界面，支持平台/类型/风格的结构化输入",
+      "批量生成链路已验证：接入 AIGC 生图 API，实现一次生成多张主图候选和人工筛选反馈",
+      "图生视频延展已打通：基于选中主图生成宣传视频素材，验证完整内容生产链路",
+      "Prompt 规则库已沉淀：设计风格模板和提示词规范，保证不同风格的视觉一致性",
+      "工作流演示视频已录制：展示从平台选择到批量主图生成、图生视频延展的完整流程",
+      "可对标 AI 商拍平台的降本提效案例，用于说明该工作流适合电商视觉素材生产场景"
+    ],
+    values: [
+      "把服装电商视觉素材准备从单次手工生成，改成可配置、可批量、可复盘的半自动流程，降低重复劳动成本",
+      "帮助运营快速测试不同平台、不同服装风格下的主图方向，减少反复写提示词和找参考的时间，提升上架效率",
+      "把主图生成和宣传视频延展串成同一条内容生产链路，更贴近真实电商上架和投放需求，提高素材复用率",
+      "对标 AI 商拍降本提效方向，证明 AI 工作流在电商视觉素材生产中的业务适配价值"
+    ],
+    metrics: [
+      { value: "行业参考", label: "商拍降本", note: "对标 AI 商拍平台案例" },
+      { value: "效率目标", label: "上架提效", note: "减少重复素材准备" },
+      { value: "批量", label: "主图候选", note: "一次生成多张可筛选" },
+      { value: "图生视频", label: "素材延展", note: "主图到宣传视频链路" }
+    ]
+  },
+  {
+    kind: "comicConsole",
     icon: Video,
     title: "AI漫剧自动化生产控制台",
     subtitle: "AI协作开发 / Vibe Coding 原型搭建 + AIGC Workflow",
@@ -444,7 +517,7 @@ const toolGroups: ToolGroup[] = [
   { title: "AI 协作开发 / Vibe Coding 原型搭建", subtitle: "把需求拆成可运行工具、流程规则和自动化任务", tools: ["Codex", "Cursor", "Claude", "ChatGPT"] },
   { title: "浏览器与业务运营自动化", subtitle: "用于自媒体运营、岗位收藏、网页信息筛选和状态记录", tools: ["Tabbit", "Coze 虚拟机", "OpenClaw", "Hermes", "自动化浏览器脚本"] },
   { title: "知识库与项目情报", subtitle: "用于每日沉淀、GitHub 项目总结和方法论复盘", tools: ["Obsidian", "Hermes cron", "GitHub", "Markdown", "Python"] },
-  { title: "AIGC 视频 / 图像工具", subtitle: "用于生图、生视频和提示词迭代", tools: ["即梦", "Seedance", "Midjourney", "ComfyUI"] },
+  { title: "AIGC 视频 / 图像工具", subtitle: "用于生图、生视频和提示词迭代，服务电商主图和内容生产", tools: ["即梦", "Seedance", "Midjourney", "ComfyUI"] },
   { title: "内容生产 / 剪辑工具", subtitle: "完成剪辑、包装和成片交付", tools: ["剪映", "CapCut"] },
   { title: "文档 / 平台经验", subtitle: "沉淀流程、企业协作、内容发布和数据反馈", tools: ["飞书 CLI", "飞书多维表格", "Notion", "Excel", "抖音", "小红书", "YouTube", "TikTok"] }
 ];
@@ -604,14 +677,16 @@ function AutomationCaseCard({
 function ProjectCard({
   project,
   index,
-  onImagePreview
+  onImagePreview,
+  onVideoPlay
 }: {
   project: ProjectItem;
   index: number;
   onImagePreview: (image: ImagePreview) => void;
+  onVideoPlay: (video: { title: string; description: string; videoHref: string }) => void;
 }): JSX.Element {
   const Icon = project.icon;
-  const isConsoleProject = index === 0;
+  const isConsoleProject = project.kind === "comicConsole";
   return (
     <article className="resume-project-card">
       <div className="resume-project-topline">
@@ -656,6 +731,24 @@ function ProjectCard({
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {project.demoVideo && (
+        <div className="resume-project-demo-video" aria-label={`${project.title}演示视频`}>
+          <div className="resume-project-demo-head">
+            <span>WORKFLOW DEMO</span>
+            <strong>工作流演示视频</strong>
+          </div>
+          <button
+            className="resume-project-demo-button"
+            type="button"
+            onClick={() => onVideoPlay(project.demoVideo!)}
+            aria-label={`播放${project.title}演示视频`}
+          >
+            <PlayCircle size={18} aria-hidden="true" />
+            <span>查看完整工作流演示</span>
+          </button>
         </div>
       )}
 
@@ -882,6 +975,7 @@ export default function ResumePage(): JSX.Element {
   const [activeDirectorWork, setActiveDirectorWork] = useState<DirectorWork | null>(null);
   const [activeAutomationDemo, setActiveAutomationDemo] = useState<AutomationDemo | null>(null);
   const [activeImagePreview, setActiveImagePreview] = useState<ImagePreview | null>(null);
+  const [activeProjectVideo, setActiveProjectVideo] = useState<{ title: string; description: string; videoHref: string } | null>(null);
 
   function downloadResumeFile(): void {
     const link = document.createElement("a");
@@ -956,12 +1050,12 @@ export default function ResumePage(): JSX.Element {
           <h1 id="resume-hero-title">张远博</h1>
           <h2>AI工作流落地 / 业务运营自动化 / AIGC内容生产提效</h2>
           <p className="resume-hero-statement">
-            把自媒体运营、岗位筛选、项目情报、AIGC 内容生产和知识沉淀这些重复流程，拆成规则、脚本、Agent 流程和可演示工具。
+            把服装电商主图生成、宣传视频延展、自媒体运营、岗位筛选和知识沉淀这些重复流程，拆成规则、脚本、Agent 流程和可演示工具。
           </p>
 
           <div className="resume-quick-read" aria-label="30秒看懂我">
             <span>核心展示</span>
-            <p>更适合需要把重复网页动作、内容生产流程和 AI 对话沉淀做成可执行工作流的团队。</p>
+            <p>更适合需要把电商视觉素材生产、重复网页动作、内容生产流程和 AI 对话沉淀做成可执行工作流的团队。</p>
             <ul>
               {heroProofItems.map((item) => (
                 <li key={item}>
@@ -1016,7 +1110,7 @@ export default function ResumePage(): JSX.Element {
             ))}
           </div>
           <p>
-            我更关注“AI 怎么进入真实业务流程”：把内容判断、平台运营经验、网页自动化和 AI 工具结合起来，拆解自媒体运营、岗位筛选、项目情报、AIGC 生产和知识沉淀这些高频流程。
+            我更关注“AI 怎么进入真实业务流程”：把电商视觉素材生产、内容判断、平台运营经验、网页自动化和 AI 工具结合起来，拆解主图生成、宣传视频延展、自媒体运营、岗位筛选、项目情报和知识沉淀这些高频流程。
           </p>
           <p>
             当前主要用 Codex、Cursor、Hermes、Obsidian、Tabbit、Coze、Dify、即梦、Seedance 等工具，把零散 AI 操作整理成可复用的脚本、SOP、知识库和轻量半自动工作流。
@@ -1089,11 +1183,11 @@ export default function ResumePage(): JSX.Element {
         <div className="resume-section-header">
           <SectionKicker index="05" label="Project Experience" />
           <h2 id="resume-project-title">项目经历</h2>
-          <p>重点展示 AI 工具协作、AIGC 内容生产、知识库沉淀和企业协作自动化能力，覆盖需求拆解、工具组合、状态复盘和内容交付。</p>
+          <p>重点展示电商视觉素材生产、AI 工具协作、AIGC 内容生产、知识库沉淀和企业协作自动化能力，覆盖需求拆解、工具组合、状态复盘和内容交付。</p>
         </div>
         <div className="resume-project-list">
           {projects.map((project, index) => (
-            <ProjectCard project={project} index={index} key={project.title} onImagePreview={setActiveImagePreview} />
+            <ProjectCard project={project} index={index} key={project.title} onImagePreview={setActiveImagePreview} onVideoPlay={setActiveProjectVideo} />
           ))}
         </div>
       </section>
@@ -1343,6 +1437,29 @@ export default function ResumePage(): JSX.Element {
               </button>
             </div>
             <img className="resume-image-modal-media" src={activeImagePreview.src} alt={`${activeImagePreview.title} 原图`} />
+          </div>
+        </div>
+      )}
+      {activeProjectVideo && (
+        <div
+          className="resume-video-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeProjectVideo.title}
+          onClick={() => setActiveProjectVideo(null)}
+        >
+          <div className="resume-video-modal-panel" onClick={(event) => event.stopPropagation()}>
+            <div className="resume-video-modal-head">
+              <div>
+                <span>PROJECT WORKFLOW DEMO</span>
+                <h3>{activeProjectVideo.title}</h3>
+                <p>{activeProjectVideo.description}</p>
+              </div>
+              <button type="button" onClick={() => setActiveProjectVideo(null)} aria-label="关闭演示视频">
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+            <video className="resume-video-modal-player" src={activeProjectVideo.videoHref} controls autoPlay preload="metadata" />
           </div>
         </div>
       )}

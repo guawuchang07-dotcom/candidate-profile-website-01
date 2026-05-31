@@ -3263,3 +3263,61 @@ body:has(.resume-page) {
     letter-spacing: 0.14em;
   }
 }
+
+/* 电商项目视频演示按钮 */
+.resume-project-demo-video {
+  margin-top: 24px;
+  padding: 20px;
+  background: rgba(7, 15, 37, 0.6);
+  border: 1px solid rgba(21, 247, 255, 0.15);
+  border-radius: 4px;
+}
+
+.resume-project-demo-head {
+  margin-bottom: 14px;
+}
+
+.resume-project-demo-head span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--resume-cyan);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.resume-project-demo-head strong {
+  display: block;
+  color: var(--resume-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.resume-project-demo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(21, 247, 255, 0.42);
+  background:
+    linear-gradient(90deg, rgba(21, 247, 255, 0.14), rgba(255, 77, 255, 0.1)),
+    rgba(4, 18, 42, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.resume-project-demo-button:hover,
+.resume-project-demo-button:focus-visible {
+  color: var(--resume-cyan);
+  border-color: rgba(21, 247, 255, 0.86);
+  background:
+    linear-gradient(90deg, rgba(21, 247, 255, 0.22), rgba(255, 77, 255, 0.16)),
+    rgba(4, 18, 42, 0.95);
+}

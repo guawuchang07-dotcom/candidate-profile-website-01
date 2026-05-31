@@ -79,7 +79,7 @@ const profileAbilities = [
     icon: "ai",
     title: "AIGC生产流程",
     subtitle: "AI Production",
-    points: ["小说到视频任务", "Prompt / 分镜规则", "候选版本复盘"]
+    points: ["电商主图生成", "小说到视频任务", "宣传视频延展"]
   },
   {
     icon: "trend",
@@ -90,6 +90,16 @@ const profileAbilities = [
 ];
 
 const profileProjects: ProfileProject[] = [
+  {
+    icon: "growth",
+    title: "服装电商主图与宣传视频生成工作流",
+    subtitle: "E-commerce AIGC Workflow · 降本提效主推项目",
+    description: "针对服装电商商拍成本高、上新素材准备重复的痛点，批量生成电商主图并延展为宣传视频，对标 AI 商拍降本提效场景。",
+    role: "业务痛点拆解、生成参数设计、批量出图流程、人工筛选反馈、图生视频链路验证",
+    value: "把电商视觉素材准备做成可配置、可批量、可复盘的半自动工作流，帮助运营快速测试主图风格和视频卖点",
+    tags: ["电商主图", "服装风格", "批量生成", "图生视频"],
+    detailHref: "resume#resume-projects"
+  },
   {
     icon: "growth",
     title: "业务运营自动化脚本集",
@@ -123,7 +133,7 @@ const profileProjects: ProfileProject[] = [
 ];
 
 const profileFutureDirection = {
-  title: "扩展方向：飞书 CLI 与企业协作 Agent 工作流"
+  title: "扩展方向：飞书 CLI 企业协作 Agent / AI 数字人直播"
 };
 
 const profileTools = ["Codex", "Cursor", "Hermes", "Obsidian", "Tabbit", "Coze", "OpenClaw", "GitHub", "飞书 CLI", "AIGC视频", "业务运营自动化"];
@@ -472,7 +482,7 @@ export default function CandidateSystemPage(): JSX.Element {
                       <h2>个人简介</h2>
                     </div>
                     <p>
-                      AIGC视频项目实战经验的 AI 工作流实践者，持续探索业务运营自动化，能够结合浏览器自动化、Codex、Hermes、Obsidian 等工具，提高运营、内容生产和知识沉淀效率。
+                      面向 AI 赋能业务场景的工作流实践者，能够结合电商视觉素材生成、AIGC 视频、浏览器自动化、Codex、Hermes、Obsidian 等工具，提高运营、内容生产和知识沉淀效率。
                     </p>
                   </section>
 
