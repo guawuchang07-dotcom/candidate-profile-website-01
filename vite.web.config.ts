@@ -16,13 +16,16 @@ export default defineConfig({
         const assetsDir = resolve(distDir, "assets");
         const profileDir = resolve(distDir, "profile");
         const resumeDir = resolve(distDir, "resume");
+        const gugaProjectDir = resolve(distDir, "projects", "ai-content-ops");
         mkdirSync(assetsDir, { recursive: true });
         mkdirSync(profileDir, { recursive: true });
         mkdirSync(resumeDir, { recursive: true });
+        mkdirSync(gugaProjectDir, { recursive: true });
         copyFileSync(resolve(__dirname, "src/renderer/src/assets/static/favicon.svg"), resolve(assetsDir, "favicon.svg"));
         copyFileSync(resolve(distDir, "index.html"), resolve(distDir, "404.html"));
         copyFileSync(resolve(distDir, "index.html"), resolve(profileDir, "index.html"));
         copyFileSync(resolve(distDir, "index.html"), resolve(resumeDir, "index.html"));
+        copyFileSync(resolve(distDir, "index.html"), resolve(gugaProjectDir, "index.html"));
         writeFileSync(resolve(distDir, "robots.txt"), "User-agent: *\nAllow: /\n", "utf8");
         writeFileSync(resolve(distDir, "_redirects"), "/* /index.html 200\n", "utf8");
         writeFileSync(
@@ -35,6 +38,7 @@ export default defineConfig({
             "- /",
             "- /profile",
             "- /resume",
+            "- /projects/ai-content-ops",
             "",
             "Tencent Cloud COS:",
             "",

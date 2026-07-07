@@ -1,0 +1,17 @@
+.scrambled-text {
+  display: inline;
+}
+
+.scrambled-char {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  white-space: pre;
+  will-change: contents, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrambled-char {
+    will-change: auto;
+  }
+}

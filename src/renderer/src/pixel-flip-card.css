@@ -1,0 +1,56 @@
+.pixel-flip-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 0.75;
+  cursor: pointer;
+  outline: none;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(21, 247, 255, 0.28);
+  border-radius: 16px;
+  background: rgba(6, 12, 28, 0.6);
+  box-shadow:
+    0 0 30px -8px rgba(21, 247, 255, 0.3),
+    0 24px 60px -30px #000;
+}
+
+.pixel-flip-card:focus-visible {
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 2px rgba(21, 247, 255, 0.5),
+    0 0 30px -8px rgba(21, 247, 255, 0.3),
+    0 24px 60px -30px #000;
+}
+
+.pixel-flip-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+}
+
+.pixel-flip-face--back {
+  display: none;
+  z-index: 2;
+  object-fit: cover;
+}
+
+.pixel-flip-face--back.is-on {
+  display: block;
+}
+
+.pixel-flip-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.pixel-flip-cell {
+  display: none;
+  position: absolute;
+  box-shadow: 0 0 6px rgba(21, 247, 255, 0.5);
+}

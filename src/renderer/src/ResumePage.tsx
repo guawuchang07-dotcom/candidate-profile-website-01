@@ -1,58 +1,51 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import {
-  ArrowLeft,
-  BarChart3,
   Bot,
   Briefcase,
   CheckCircle2,
-  Clock,
   Cpu,
-  Database,
-  Download,
-  GitBranch,
-  Layers,
+  Image as ImageIcon,
   Mail,
   MapPin,
-  MessageSquare,
   PlayCircle,
-  Repeat,
   Rocket,
-  Search,
-  Video,
-  Wrench,
+  Workflow,
   X
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import avatarOrbAsset from "./assets/cyber/avatar-orb.png";
+import candidateAvatarAsset from "./assets/generated/portfolio/candidate-avatar.png";
+import heroLockBgAsset from "./assets/generated/portfolio/hero-lock-bg.png";
+import heroLockVideoAsset from "./assets/static/media/hero/hero-lockscreen-bg.mp4";
+import idBadgeAsset from "./assets/static/media/hero/id-badge.png";
+import section2CityBgAsset from "./assets/static/media/section2-city-bg.png";
+import CoreCapabilityStack from "./CoreCapabilityStack";
+import Dock from "./Dock";
+import PixelTrail from "./PixelTrail";
+import Section2Ambient from "./Section2Ambient";
+// @ts-expect-error -- TiltedCard is copied in as a plain JSX module.
+import TiltedCard from "./TiltedCard";
+import ProjectCasePage, { hasProjectCase } from "./ProjectCasePage";
 import "./resume-page.css";
+import "./core-capability-stack.css";
+import "./pixel-trail.css";
 
-const resumePdfHref = new URL("./assets/static/files/zhang-yuanbo-resume.pdf", import.meta.url).href;
-const resumePdfFileName = "张远博简历.pdf";
+type CssVars = CSSProperties & Record<`--${string}`, string>;
+
 const contactPhone = "17564138094";
-const profileOverviewHref = getAppRouteHref("profile");
-const aiComicConsoleGithubHref = "https://github.com/guawuchang07-dotcom/ai-comic-production-console";
-
-type AutomationDemo = {
-  title: string;
-  description: string;
-  videoHref: string;
+type ResumeNavItem = {
+  label: string;
+  href: string;
 };
 
-const automationDemos = {
-  selfMedia: {
-    title: "自媒体运营辅助脚本演示",
-    description: "自动化浏览器辅助内容识别、互动条件判断、评论草稿和执行状态记录",
-    videoHref: new URL("./assets/static/media/automation/self-media-ops-assistant.m4v", import.meta.url).href
-  },
-  boss: {
-    title: "BOSS 岗位线索收藏脚本演示",
-    description: "自动化浏览器与 AI Agent 辅助岗位筛选、收藏标记和流程状态记录",
-    videoHref: new URL("./assets/static/media/automation/boss-job-assistant-web.mp4", import.meta.url).href
-  }
-} satisfies Record<string, AutomationDemo>;
-
-const ecommerceWorkflowVideoHref = new URL("./assets/static/media/ecommerce/ecommerce-workflow-demo.mp4", import.meta.url).href;
-
+const resumeNavItems: ResumeNavItem[] = [
+  { label: "首页", href: "#resume-hero" },
+  { label: "能力栈", href: "#resume-core-stack" },
+  { label: "项目档案", href: "#resume-project-archive" },
+  { label: "作品", href: "#resume-director" },
+  { label: "边界", href: "#resume-delivery" },
+  { label: "联系", href: "#resume-contact" }
+];
 const ecommerceScreenshots: ImagePreview[] = [
   {
     title: "工作流配置界面",
@@ -71,57 +64,6 @@ const ecommerceScreenshots: ImagePreview[] = [
   }
 ];
 
-const consoleScreenshots = [
-  {
-    title: "项目创建",
-    description: "小说输入、项目风格、比例、生成模式和状态概览。",
-    src: new URL("./assets/static/media/console/console-project-create.png", import.meta.url).href
-  },
-  {
-    title: "资产确认",
-    description: "人物/场景资产卡、参考图候选和人工确认流程。",
-    src: new URL("./assets/static/media/console/console-assets.png", import.meta.url).href
-  },
-  {
-    title: "任务执行",
-    description: "视频任务、参考图路径、生成结果和运行日志复盘。",
-    src: new URL("./assets/static/media/console/console-tasks.png", import.meta.url).href
-  }
-];
-
-const difyKnowledgeScreenshots = [
-  {
-    title: "资产分析测试",
-    description: "基于知识库规则，从小说片段生成角色设定、场景设定和参考图提示词。",
-    src: new URL("./assets/static/media/dify/dify-asset-analysis.png", import.meta.url).href
-  },
-  {
-    title: "视频任务生成",
-    description: "基于已确认人物与场景，生成 1-3 条结构化即梦视频任务。",
-    src: new URL("./assets/static/media/dify/dify-video-tasks.png", import.meta.url).href
-  },
-  {
-    title: "任务质检测试",
-    description: "检查镜头可执行性、平台安全风险和提示词过载问题，输出修改建议。",
-    src: new URL("./assets/static/media/dify/dify-task-review.png", import.meta.url).href
-  }
-];
-
-const knowledgeBaseScreenshots = [
-  {
-    title: "Obsidian 知识库关系图谱",
-    description: "中文目录、每日沉淀、AI学习、项目经验和对话索引已经形成可视化链接。",
-    src: new URL("./assets/static/media/proof/obsidian-knowledge-graph.png", import.meta.url).href
-  }
-];
-
-const shortVideoScreenshots = {
-  douyin: {
-    title: "抖音数据中心截图",
-    description: "抖音账号诊断与经营数据截图，用于验证阶段性短视频播放和内容测试效果。",
-    src: new URL("./assets/static/media/proof/douyin-data-center.jpg", import.meta.url).href
-  }
-} satisfies Record<string, ImagePreview>;
 
 function getAppRouteHref(route = ""): string {
   const basePath = window.location.pathname
@@ -131,55 +73,8 @@ function getAppRouteHref(route = ""): string {
   return `${normalizedBase}${route}`;
 }
 
-type CapabilityGroup = {
-  icon: LucideIcon;
-  title: string;
-  subtitle: string;
-  items: string[];
-};
-
-type ProjectItem = {
-  kind?: "comicConsole" | "ecommerce";
-  icon: LucideIcon;
-  title: string;
-  subtitle: string;
-  focus: string;
-  summary: string;
-  background: string;
-  responsibilities: string[];
-  tools?: string[];
-  platforms?: string[];
-  values: string[];
-  proof?: string[];
-  screenshots?: ImagePreview[];
-  demoVideo?: {
-    title: string;
-    description: string;
-    videoHref: string;
-  };
-  metrics?: Array<{
-    value: string;
-    label: string;
-    note?: string;
-    proof?: ImagePreview;
-  }>;
-};
-
-type AutomationCase = {
-  icon: LucideIcon;
-  title: string;
-  scene: string;
-  description: string;
-  actions: string[];
-  value: string[];
-  proof: string[];
-  tags: string[];
-  demo?: AutomationDemo;
-};
-
 type ToolGroup = {
   title: string;
-  subtitle: string;
   tools: string[];
 };
 
@@ -195,287 +90,133 @@ type DirectorWork = {
   posterSrc: string;
 };
 
+type DirectorReelClip = Pick<DirectorWork, "title" | "duration" | "videoSrc" | "posterSrc">;
+
 type ImagePreview = {
   title: string;
   description: string;
   src: string;
 };
 
-const targetKeywords = ["电商视觉工作流", "业务运营自动化", "AIGC流程控制"];
 
-const heroProofItems = [
-  "服装电商主图与宣传视频生成工作流：平台、服装类型、风格方向到批量视觉素材",
-  "业务运营自动化脚本集：自媒体运营、岗位线索、GitHub 情报",
-  "AIGC 生产控制台：小说分析、资产确认、视频任务复盘",
-  "AI 知识库沉淀系统：Hermes + Obsidian 每日复盘"
+
+const archiveProjects = [
+  {
+    index: "01",
+    detailSlug: "ai-content-ops",
+    title: "AI 自媒体运营工作台",
+    label: "AI Content Ops Workbench",
+    summary: "从一个选题出发，结合私有资料库、Obsidian、历史成文和联网搜索，生成可审核的多平台内容包。",
+    problem: "自媒体创作者多平台发文时，需要反复查资料、改写、排版、复用历史内容和做发布前检查。",
+    flow: "选题输入→私有资料检索→联网搜索证据→多平台草稿→发布前审核包→Obsidian / 历史沉淀。",
+    proof: "创作台、私有资料库、Obsidian 同步、历史记录、发布中心和审核包已形成可演示流程。",
+    tags: ["Vue", "FastAPI", "Obsidian", "Research Bundle"]
+  },
+  {
+    index: "02",
+    detailSlug: "ecommerce-aigc-workflow",
+    title: "服装电商主图 / 宣传视频生成工作流",
+    label: "E-commerce AIGC Workflow",
+    summary: "从服装参考图、平台规格、风格选择到主图候选、人工复核、视频延展。",
+    problem: "服装电商主图 / 宣传视频需要同时处理服装参考图、平台规格和风格选择。",
+    flow: "服装参考图→平台规格→风格选择→主图候选→人工复核→视频延展。",
+    proof: "工作流配置、批量主图、图生视频和完整演示均已归档为可查看证据。",
+    tags: ["主推项目", "电商视觉", "批量生成"]
+  },
+  {
+    index: "03",
+    detailSlug: "aigc-console",
+    title: "AI 漫剧 / 视频生产控制台",
+    label: "AIGC Production Console",
+    summary: "把小说分析、资产确认、提示词、视频任务与失败复盘整理成本地控制台。",
+    problem: "AI 漫剧 / 视频生产需要把小说分析、资产确认、提示词、视频任务与失败复盘集中管理。",
+    flow: "小说分析→资产确认→提示词→视频任务→失败复盘→本地控制台。",
+    proof: "控制台截图、Dify 资产分析和任务质检截图已作为项目证据归档。",
+    tags: ["AIGC", "控制台", "任务复盘"]
+  },
+  {
+    index: "04",
+    detailSlug: "automation-scripts",
+    title: "自媒体运营自动化脚本集",
+    label: "Ops Automation Scripts",
+    summary: "把重复网页动作拆成规则、执行状态和人工确认节点，服务运营提效。",
+    problem: "自媒体运营里存在重复网页动作，需要拆成规则、执行状态和人工确认节点。",
+    flow: "重复网页动作→规则拆解→执行状态→人工确认节点→运营流程。",
+    proof: "本地脚本演示视频已归档；敏感动作保留人工确认，不做全自动发布。",
+    tags: ["浏览器自动化", "运营提效", "脚本"]
+  },
+  {
+    index: "05",
+    detailSlug: "knowledge-base",
+    title: "个人知识沉淀 / AI 知识库系统",
+    label: "Knowledge Workflow",
+    summary: "用 Hermes 与 Obsidian 把对话、复盘、项目经验和待办沉淀成知识资产。",
+    problem: "对话、复盘、项目经验和待办需要沉淀成知识资产。",
+    flow: "Hermes 与 Obsidian→对话整理→复盘整理→项目经验 / 待办沉淀→知识资产。",
+    proof: "Obsidian 关系图谱与知识沉淀流程已作为可查看证据归档。",
+    tags: ["Hermes", "Obsidian", "知识库"]
+  },
+  {
+    index: "06",
+    detailSlug: "boss-job-collector",
+    title: "BOSS 岗位收藏脚本",
+    label: "BOSS Job Collector",
+    summary: "把岗位搜索、条件过滤、信息提取、本地记录和人工筛选串成可复盘流程。",
+    problem: "求职筛选需要反复打开岗位、比对条件和记录状态，人工整理容易遗漏。",
+    flow: "岗位搜索→条件过滤→信息提取→本地记录→人工筛选→复盘优化。",
+    proof: "本地脚本演示视频与岗位信息记录流程；不包含自动沟通、批量投递或账号托管。",
+    tags: ["浏览器自动化", "求职流程", "人工筛选"]
+  }
 ];
 
-const aboutFocusItems = ["电商视觉工作流", "业务运营自动化", "AIGC 内容生产流程", "AI Agent 工具落地"];
+const aboutFocusItems = ["电商视觉工作流", "FDE 前沿部署", "AIGC 内容生产流程", "AI Agent 工具落地"];
 
 const independentScopes = [
-  "浏览器自动化脚本设计与调试",
-  "自媒体运营、岗位筛选、项目情报等运营流程提效",
-  "AIGC 内容生产流程拆解",
-  "Prompt / 分镜 / 生图生视频规范沉淀",
-  "内容质检标准与返工原因分类",
-  "Dify / Coze 轻量知识库与工作流原型搭建",
-  "使用 Codex / Cursor 做简单控制台原型",
-  "AI 工具测试、对比和适用场景判断",
-  "内容生产 SOP、任务表、状态表设计",
-  "Obsidian / Hermes 每日复盘与知识沉淀"
+  "浏览器自动化脚本",
+  "AIGC 流程拆解",
+  "内容质检标准",
+  "Dify / Coze 原型",
+  "Prompt / 分镜沉淀",
+  "知识库每日复盘"
 ];
 
 const collaborationScopes = [
   "企业级后端架构",
   "多用户权限系统",
-  "大规模任务队列",
   "复杂 API 联调",
-  "自动发布平台工程化",
-  "高稳定性部署与监控"
+  "生产级任务队列 / 监控"
 ];
 
-const targetIndustries = ["电商品牌 / 服装品牌", "AI应用公司", "AIGC内容公司", "业务运营团队", "短视频 / 内容平台", "AI工具团队", "AI Agent / 工作流团队"];
-
-const capabilityGroups: CapabilityGroup[] = [
+const teamFitItems = [
   {
-    icon: Repeat,
-    title: "业务运营自动化",
-    subtitle: "Browser Automation for Operations",
-    items: ["自媒体运营辅助", "岗位线索筛选与收藏", "GitHub 项目情报日报", "网页状态记录与复盘"]
+    title: "电商品牌 / 服装品牌",
+    description: "需要批量生成主图、视频素材和内容投放资产的团队。"
   },
   {
-    icon: Bot,
-    title: "AIGC生产流程",
-    subtitle: "AI Production Workflow",
-    items: ["电商主图批量生成", "宣传视频延展", "小说到视频任务拆解", "生图 / 生视频链路验证"]
+    title: "AI 应用公司",
+    description: "需要把 Agent / 工具流做成可演示原型和业务流程的团队。"
   },
   {
-    icon: Database,
-    title: "知识与工具沉淀",
-    subtitle: "Knowledge & Tooling System",
-    items: ["Hermes 每日沉淀", "Obsidian 知识库", "开源工具调研", "飞书 CLI 协作探索"]
-  }
-];
-
-const automationCases: AutomationCase[] = [
-  {
-    icon: MessageSquare,
-    title: "自媒体运营辅助脚本",
-    scene: "Twitter / X 内容运营",
-    description: "面向自媒体运营中的重复互动动作，把目标内容识别、点赞、转发、评论草稿和执行状态记录拆成可控脚本流程。",
-    actions: ["识别目标帖子与互动条件", "辅助点赞、转发、评论草稿生成", "记录已处理内容与执行状态", "保留人工确认与规则控制"],
-    value: ["减少重复操作时间", "让内容互动动作更有节奏", "便于复盘哪些内容值得持续跟进"],
-    proof: ["已在自动化浏览器中跑通脚本", "已接入自媒体运营辅助演示视频", "定位为运营动作辅助，不做无规则刷量"],
-    tags: ["浏览器自动化", "自媒体运营", "状态记录", "人工确认"],
-    demo: automationDemos.selfMedia
+    title: "AIGC 内容公司",
+    description: "需要稳定产出短视频、漫剧、图文内容和素材包的团队。"
   },
   {
-    icon: Briefcase,
-    title: "BOSS 岗位线索收藏脚本",
-    scene: "岗位筛选 / 线索管理",
-    description: "把岗位浏览、关键词判断、相关岗位收藏这些重复动作自动化，用于验证网页信息筛选和业务线索收集的提效价值。",
-    actions: ["按岗位关键词和方向筛选", "收藏符合条件的岗位", "减少人工重复翻页浏览", "沉淀岗位信息筛选规则"],
-    value: ["提升岗位线索收集效率", "把个人求职流程抽象成业务线索筛选能力", "可迁移到销售线索、达人线索、竞品信息收集等场景"],
-    proof: ["已接入自动化演示视频", "可在网页流程中展示收藏动作与状态变化"],
-    tags: ["BOSS直聘", "线索筛选", "网页自动化", "流程提效"],
-    demo: automationDemos.boss
+    title: "FDE / 前沿部署团队",
+    description: "需要把工具、脚本、工作流嵌入真实业务现场的团队。"
   },
   {
-    icon: GitBranch,
-    title: "GitHub 项目情报日报",
-    scene: "开源项目发现 / 工具调研",
-    description: "每天自动整理 GitHub 上值得关注的 AI 项目，把项目简介、适用场景、可试用价值和后续动作沉淀成情报材料。",
-    actions: ["定时扫描项目来源", "总结项目用途与亮点", "判断是否值得安装验证", "沉淀到知识库或工具调研清单"],
-    value: ["持续发现可用工具", "减少盲目收藏 GitHub 项目", "为 AI Agent 和业务自动化补充工具储备"],
-    proof: ["已有每日 GitHub 项目总结脚本", "可与 Obsidian 知识库沉淀联动"],
-    tags: ["GitHub", "项目情报", "AI工具调研", "每日自动总结"]
+    title: "短视频 / 内容平台",
+    description: "需要内容运营、脚本拆解、批量生产和复盘机制的团队。"
+  },
+  {
+    title: "AI 工具团队",
+    description: "需要测试工具能力、沉淀案例、整理工作流和用户场景反馈的团队。"
   }
 ];
 
-function getAutomationDemoForItem(item: string): AutomationDemo | null {
-  if (item.includes("自媒体")) {
-    return automationDemos.selfMedia;
-  }
 
-  if (item.includes("岗位")) {
-    return automationDemos.boss;
-  }
 
-  return null;
-}
 
-const projects: ProjectItem[] = [
-  {
-    kind: "ecommerce",
-    icon: Layers,
-    title: "服装电商主图与宣传视频生成工作流",
-    subtitle: "E-commerce Main Image + Promo Video AIGC Workflow",
-    focus: "降低服装电商视觉素材成本，提升上架和投放效率",
-    summary:
-      "针对服装电商商拍成本高、上新素材准备重复的痛点，把平台要求、服装类型、风格方向整理成可配置输入，批量生成电商主图候选，并延展为宣传视频素材，对标 AI 商拍降本提效场景。",
-    background:
-      "项目背景：服装电商上新频繁，主图、风格测试和短视频素材准备都需要反复找参考、写提示词、出图筛选和视频延展，适合用 AI 工作流降低重复素材准备成本、缩短上架准备周期。",
-    responsibilities: [
-      "拆解服装电商主图生产流程，把平台调性、服装类型、风格方向、视觉卖点整理成结构化输入",
-      "设计批量生成链路，让同一商品方向一次产出多张主图候选，快速测试不同视觉风格和平台适配性",
-      "保留人工筛选和反馈环节，判断主图是否符合平台调性、服装风格和转化展示需求，避免盲目生成",
-      "将通过筛选的电商主图延展为宣传视频素材，验证从静态商品图到短视频投放素材的完整链路",
-      "用 AI 协作开发方式搭建可演示工作流，把原本分散在对话和生成工具里的操作整理成可复用 SOP"
-    ],
-    tools: ["Codex", "Cursor", "AIGC 生图工具", "图生视频工具", "Prompt 规则库", "工作流原型", "人工筛选反馈"],
-    screenshots: ecommerceScreenshots,
-    demoVideo: {
-      title: "电商主图与视频生成工作流演示",
-      description: "展示从平台选择、服装类型配置到批量主图生成、图生视频延展的完整流程",
-      videoHref: ecommerceWorkflowVideoHref
-    },
-    proof: [
-      "工作流原型已跑通：用 Codex 搭建配置界面，支持平台/类型/风格的结构化输入",
-      "批量生成链路已验证：接入 AIGC 生图 API，实现一次生成多张主图候选和人工筛选反馈",
-      "图生视频延展已打通：基于选中主图生成宣传视频素材，验证完整内容生产链路",
-      "Prompt 规则库已沉淀：设计风格模板和提示词规范，保证不同风格的视觉一致性",
-      "工作流演示视频已录制：展示从平台选择到批量主图生成、图生视频延展的完整流程",
-      "可对标 AI 商拍平台的降本提效案例，用于说明该工作流适合电商视觉素材生产场景"
-    ],
-    values: [
-      "把服装电商视觉素材准备从单次手工生成，改成可配置、可批量、可复盘的半自动流程，降低重复劳动成本",
-      "帮助运营快速测试不同平台、不同服装风格下的主图方向，减少反复写提示词和找参考的时间，提升上架效率",
-      "把主图生成和宣传视频延展串成同一条内容生产链路，更贴近真实电商上架和投放需求，提高素材复用率",
-      "对标 AI 商拍降本提效方向，证明 AI 工作流在电商视觉素材生产中的业务适配价值"
-    ],
-    metrics: [
-      { value: "行业参考", label: "商拍降本", note: "对标 AI 商拍平台案例" },
-      { value: "效率目标", label: "上架提效", note: "减少重复素材准备" },
-      { value: "批量", label: "主图候选", note: "一次生成多张可筛选" },
-      { value: "图生视频", label: "素材延展", note: "主图到宣传视频链路" }
-    ]
-  },
-  {
-    kind: "comicConsole",
-    icon: Video,
-    title: "AI漫剧自动化生产控制台",
-    subtitle: "AI协作开发 / Vibe Coding 原型搭建 + AIGC Workflow",
-    focus: "从小说到视频任务的 AI 内容生产 SOP 原型",
-    summary: "把 AI 漫剧生产中的小说分析、资产确认、Prompt 规范、参考图选择、视频任务执行和失败复盘，整理成一个可操作的本地生产控制台。",
-    background:
-      "项目背景：AI 漫剧生产中容易出现人物/场景资产混乱、提示词复用困难、生成结果难追踪、失败后难复盘等问题，需要把零散工具操作整理成可执行流程。",
-    responsibilities: [
-      "拆解从小说输入到视频任务执行的关键环节，定义项目创建、资产确认、任务执行三段式流程",
-      "用 Codex / Cursor 做 AI 协作开发 / Vibe Coding 原型搭建，把流程想法落成 Electron 本地控制台",
-      "接入并调试 Agent API，让人物设定卡、场景设定卡和视频提示词按项目规则生成",
-      "设计多人物参考图、场景参考图选择和图片编号规则，保证视频任务能明确引用视觉资产",
-      "接入 Dreamina CLI，保留 dry-run / live-run 分支，并记录 submit_id、失败原因和输出路径",
-      "加入候选视频版本管理，避免新结果覆盖旧结果，方便低成本对比和复盘"
-    ],
-    tools: ["Codex", "Cursor", "Tabbit", "Coze", "OpenClaw", "Hermes", "GitHub 开源项目", "Agent API", "Dreamina CLI", "JSON 状态文件"],
-    proof: [
-      "可查看本地控制台截图：项目创建、资产确认、任务执行三页已跑通",
-      "可查看 GitHub 脱敏仓库：保留 Electron、Agent 规则、Dreamina CLI 调用和状态结构",
-      "已完成真实 Dreamina CLI 生图 / 生视频链路验证，并保留 dry-run 成本保护",
-      "已支持多人物参考图、场景参考图、视频候选版本和 status.json 状态回写"
-    ],
-    values: [
-      "把原本分散在对话、表格、生成工具里的 AI 内容流程沉淀为可复用 SOP",
-      "通过人工资产确认和参考图选择，降低角色、场景不一致带来的返工成本",
-      "通过 status.json 状态回写、失败原因记录和 submit_id 追踪，让真实生成过程可复盘",
-      "通过候选视频版本管理支持低成本多版本对比，避免盲目重复生成"
-    ],
-    metrics: [
-      { value: "3页", label: "核心控制台", note: "项目 / 资产 / 任务" },
-      { value: "8+", label: "自动化脚本", note: "分析、提示词、CLI、状态" },
-      { value: "CLI", label: "真实生成链路", note: "Dreamina dry-run / live-run" },
-      { value: "多候选", label: "视频复盘", note: "同任务多版本管理" }
-    ]
-  },
-  {
-    icon: Database,
-    title: "个人 AI 知识库与 Hermes 每日沉淀系统",
-    subtitle: "Hermes + Obsidian + Codex",
-    focus: "把 AI 对话转成每日复盘和知识资产",
-    summary: "用 Hermes 作为主要对话入口，每天 23:00 自动整理本地会话，把工作推进、AI学习、项目经验和待办沉淀到 Obsidian，减少手动写日报、整理文档和回顾任务的时间，让日常沟通转化为可复盘、可检索的知识资产。",
-    background:
-      "项目背景：日常和 AI 对话很容易聊完即散，项目经验、学习内容和任务复盘无法沉淀。这个系统把聊天记录从“临时对话”转成可复盘、可检索、可持续更新的个人知识库。",
-    responsibilities: [
-      "设计 Obsidian 中文目录结构，区分收件箱、对话提炼、个人画像、项目经验、复盘系统和 AI 学习",
-      "接入 Hermes 本地 session 记录，覆盖终端和桌宠两种入口",
-      "编写每日沉淀脚本，自动分类闲聊、工作推进、项目经验、AI学习和待办",
-      "配置 Hermes cron，每天 23:00 自动生成 Obsidian 每日复盘",
-      "优化模型成本，把后台总结从高成本模型切换到轻量模型，并加入输入截断和失败保护"
-    ],
-    tools: ["Hermes", "Obsidian", "Codex", "Python", "Markdown", "Cron", "本地 session"],
-    proof: [
-      "已生成 Obsidian 每日复盘笔记",
-      "已配置每日 23:00 自动沉淀任务",
-      "已支持桌宠多窗口聊天纳入每日总结",
-      "不保存原始对话，默认只沉淀摘要与可执行待办",
-      "可查看 Obsidian 关系图谱与中文目录结构截图"
-    ],
-    screenshots: knowledgeBaseScreenshots,
-    values: [
-      "把 AI 对话从一次性聊天变成可复盘的知识资产",
-      "为项目经验、学习内容和个人画像建立长期沉淀入口",
-      "后续可扩展到团队员工的工作日志和知识库沉淀流程",
-      "展示对 AI 工具、自动化脚本、本地知识库和成本控制的组合能力"
-    ],
-    metrics: [
-      { value: "23:00", label: "每日自动沉淀", note: "Hermes cron 定时执行" },
-      { value: "5类", label: "自动分类", note: "闲聊 / 工作 / 项目 / 学习 / 待办" },
-      { value: "本地", label: "数据归属", note: "Obsidian Markdown 文件" },
-      { value: "低成本", label: "模型策略", note: "轻量模型 + 截断 + 少重试" }
-    ]
-  },
-  {
-    icon: Wrench,
-    title: "飞书 CLI 与企业协作 Agent 工作流探索",
-    subtitle: "Feishu CLI / Enterprise Agent Workflow",
-    focus: "会议、日程、文档、表格和待办的企业协作自动化预研",
-    summary: "围绕飞书 Agent 生态和飞书 CLI，拆解企业协作中的会议纪要、日程安排、文档更新、多维表格记录和日报复盘场景，探索外部 AI Agent 如何把分散办公动作串成可确认、可执行、可复盘的企业工作流。",
-    background:
-      "项目背景：很多团队的会议结论、任务跟进、文档更新和表格维护分散在不同协作入口中，人工整理和跨部门同步成本高。该方向用于探索把企业协作平台接入 AI Agent，让重复办公动作具备自动化入口。",
-    responsibilities: [
-      "梳理 Aily、妙搭、多维表格 Agent、飞书 CLI 的适用场景和能力边界",
-      "设计“语音 / 会议记录 -> 待办拆解 -> 日程 / 文档 / 表格更新”的自动化流程",
-      "把审批、信息收集、项目管理等业务需求拆成低代码工具和 Agent 执行方案",
-      "规划企业协作 Agent 的授权范围、人工确认、数据边界和失败兜底机制"
-    ],
-    tools: ["飞书", "飞书 CLI", "Aily", "妙搭", "多维表格", "Hermes", "Codex"],
-    proof: ["预研中：已完成飞书 Agent 生态和 CLI 场景拆解", "覆盖会议、日程、文档、表格、待办等高频协作动作", "强调关键写入前人工确认，避免无控制自动执行"],
-    values: [
-      "降低业务团队搭建内部工具和自动化流程的门槛",
-      "减少会议纪要、日报、任务跟进和表格维护中的重复劳动",
-      "把个人 AI 工作流经验迁移到企业组织效能场景",
-      "让人负责目标设定、规则管理和结果确认，Agent 负责重复执行动作"
-    ],
-    metrics: [
-      { value: "4类", label: "Agent 入口", note: "Aily / 妙搭 / 多维表格 / CLI" },
-      { value: "5项", label: "协作动作", note: "会议 / 日程 / 文档 / 表格 / 待办" },
-      { value: "确认制", label: "安全策略", note: "关键写入前人工确认" }
-    ]
-  },
-  {
-    icon: BarChart3,
-    title: "短视频账号内容运营",
-    subtitle: "Short Video Content Operations",
-    focus: "多平台内容测试与复盘",
-    summary: "围绕小红书、抖音、YouTube 持续测试选题、标题、封面和内容结构，后台截图显示抖音播放 60 万+、YouTube 观看 8 万+，用数据反馈迭代内容方向。",
-    background: "基于多平台内容发布经验，持续测试不同内容方向、标题、封面、选题和视频结构，把播放量、互动和平台反馈转化为下一轮内容优化依据。",
-    responsibilities: ["短视频内容创作", "选题策划与脚本组织", "标题 / 封面 / 内容结构测试", "平台数据观察", "内容方向迭代", "多平台发布与复盘"],
-    platforms: ["小红书", "抖音", "YouTube", "TikTok"],
-    proof: [
-      "抖音数据中心截图：阶段播放 60 万+，账号诊断超过同类作者",
-      "YouTube Studio 截图：观看 8 万+，观看时长 180 小时+",
-      "小红书近 30 日浏览量 7 万+",
-      "数据来自个人运营账号阶段性统计，用于说明内容测试和平台反馈经验"
-    ],
-    values: ["积累多平台内容判断和运营经验", "能够结合数据反馈调整选题与结构", "对短视频内容节奏和爆款结构有实操理解"],
-    metrics: [
-      { value: "60万+", label: "抖音播放验证", note: "数据中心截图", proof: shortVideoScreenshots.douyin },
-      { value: "8万+", label: "YouTube 观看", note: "YouTube Studio 截图" },
-      { value: "百万+", label: "抖音内容浏览", note: "账号阶段性数据" },
-      { value: "7万+", label: "小红书近 30 日浏览", note: "短周期内容验证" }
-    ]
-  }
-];
 
 const directorWorks: DirectorWork[] = [
   {
@@ -513,45 +254,34 @@ const directorWorks: DirectorWork[] = [
   }
 ];
 
-const toolGroups: ToolGroup[] = [
-  { title: "AI 协作开发 / Vibe Coding 原型搭建", subtitle: "把需求拆成可运行工具、流程规则和自动化任务", tools: ["Codex", "Cursor", "Claude", "ChatGPT"] },
-  { title: "浏览器与业务运营自动化", subtitle: "用于自媒体运营、岗位收藏、网页信息筛选和状态记录", tools: ["Tabbit", "Coze 虚拟机", "OpenClaw", "Hermes", "自动化浏览器脚本"] },
-  { title: "知识库与项目情报", subtitle: "用于每日沉淀、GitHub 项目总结和方法论复盘", tools: ["Obsidian", "Hermes cron", "GitHub", "Markdown", "Python"] },
-  { title: "AIGC 视频 / 图像工具", subtitle: "用于生图、生视频和提示词迭代，服务电商主图和内容生产", tools: ["即梦", "Seedance", "Midjourney", "ComfyUI"] },
-  { title: "内容生产 / 剪辑工具", subtitle: "完成剪辑、包装和成片交付", tools: ["剪映", "CapCut"] },
-  { title: "文档 / 平台经验", subtitle: "沉淀流程、企业协作、内容发布和数据反馈", tools: ["飞书 CLI", "飞书多维表格", "Notion", "Excel", "抖音", "小红书", "YouTube", "TikTok"] }
-];
-
-const workflowSteps = ["业务场景识别", "规则拆解", "脚本 / Agent 执行", "状态记录", "结果复盘", "知识沉淀"];
-
-const consoleEvidenceSteps = [
+const directorReelClips: DirectorReelClip[] = [
   {
-    step: "01",
-    title: "项目创建",
-    label: "小说输入 / 风格配置",
-    description: "上传或粘贴小说，设置视频风格、比例、生成模式和音频策略。"
+    title: "AI 影像片段 01",
+    duration: "00:25",
+    videoSrc: new URL("./assets/static/media/director/reel/director-reel-01.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/reel/director-reel-01.jpg", import.meta.url).href
   },
   {
-    step: "02",
-    title: "资产确认",
-    label: "人物 / 场景 / 参考图",
-    description: "Agent 生成设定卡后，人工编辑、上传、重生并选择参考图。"
+    title: "AI 影像片段 02",
+    duration: "00:24",
+    videoSrc: new URL("./assets/static/media/director/reel/director-reel-02.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/reel/director-reel-02.jpg", import.meta.url).href
   },
   {
-    step: "03",
-    title: "任务执行",
-    label: "提示词 / 多参考图",
-    description: "按单条视频任务选择多人物与场景图，同步图片编号和最终提示词。"
-  },
-  {
-    step: "04",
-    title: "复盘留痕",
-    label: "候选视频 / 状态回写",
-    description: "记录 submit_id、输出路径、失败原因，并保留同任务多版本候选。"
+    title: "AI 影像片段 03",
+    duration: "00:21",
+    videoSrc: new URL("./assets/static/media/director/reel/director-reel-03.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/reel/director-reel-03.jpg", import.meta.url).href
   }
 ];
 
-const consoleImplementationProof = ["AI 协作开发 / Vibe Coding 原型搭建", "真实接入 Dreamina CLI", "支持 dry-run 成本保护", "Agent 生成设定卡与提示词", "status.json 全流程状态回写", "多人物参考图编号同步", "视频候选版本管理"];
+const toolGroups: ToolGroup[] = [
+  { title: "AI 协作开发", tools: ["Codex", "Cursor", "Claude"] },
+  { title: "业务运营自动化", tools: ["Tabbit", "OpenClaw", "Coze"] },
+  { title: "知识库与情报", tools: ["Obsidian", "GitHub", "Hermes"] },
+  { title: "AIGC 视频 / 图像", tools: ["即梦", "Seedance", "剪映"] }
+];
+
 
 function SectionKicker({ index, label }: { index: string; label: string }): JSX.Element {
   return (
@@ -562,353 +292,279 @@ function SectionKicker({ index, label }: { index: string; label: string }): JSX.
   );
 }
 
-function InfoPill({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }): JSX.Element {
+
+
+
+
+function HangingBadge(): JSX.Element {
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const st = useRef({
+    phase: "fall" as "fall" | "hang",
+    y: -480, // 起始在屏幕上方(px),受重力下落
+    vy: 0,
+    angle: 0,
+    vel: 0,
+    dragging: false,
+    startX: 0,
+    startAngle: 0,
+    lastAngle: 0,
+    lastT: 0,
+    raf: 0
+  });
+
+  useEffect(() => {
+    const card = btnRef.current;
+    if (!card) return;
+    const s = st.current;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      card.style.transform = "translateY(0) rotate(0deg)";
+      return;
+    }
+    let last = performance.now();
+    const G = 2600; // 重力加速度(px/s²)
+    const K = 30; // 摆动回正力
+    const DAMP = 2.4; // 摆动阻尼
+    const KY = 240; // 竖直回弹劲度
+    const CY = 13; // 竖直回弹阻尼
+    const tick = (now: number): void => {
+      const dt = Math.min((now - last) / 1000, 0.032);
+      last = now;
+      if (s.phase === "fall") {
+        // 自由下落加速,到绳长末端(y=0)被绳子接住
+        s.vy += G * dt;
+        s.y += s.vy * dt;
+        if (s.y >= 0) {
+          s.y = 0;
+          s.phase = "hang";
+          // 下坠动量平滑转成:摆动(向左先甩)+ 竖直回弹
+          s.vel += -(s.vy * 0.00062);
+          s.vy = -s.vy * 0.18;
+        }
+      } else if (!s.dragging) {
+        // 竖直回弹(弹簧+阻尼)
+        s.vy += (-KY * s.y - CY * s.vy) * dt;
+        s.y += s.vy * dt;
+        // 钟摆摆动(弹簧+阻尼)
+        s.vel += (-K * s.angle - DAMP * s.vel) * dt;
+        s.angle += s.vel * dt;
+      }
+      const yaw = Math.max(-22, Math.min(22, s.angle * 16));
+      card.style.transform = `translateY(${s.y}px) rotate(${s.angle}rad) rotateY(${yaw}deg)`;
+      s.raf = requestAnimationFrame(tick);
+    };
+    s.raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(s.raf);
+  }, []);
+
+  const onDown = (e: React.PointerEvent<HTMLButtonElement>): void => {
+    const s = st.current;
+    s.phase = "hang"; // 下落途中被抓住也立即切到可拖拽
+    s.dragging = true;
+    s.startX = e.clientX;
+    s.startAngle = s.angle;
+    s.lastAngle = s.angle;
+    s.lastT = performance.now();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+  const onMove = (e: React.PointerEvent<HTMLButtonElement>): void => {
+    const s = st.current;
+    if (!s.dragging) return;
+    const target = Math.max(-0.6, Math.min(0.6, s.startAngle + (e.clientX - s.startX) * 0.004));
+    const now = performance.now();
+    const dt = Math.max((now - s.lastT) / 1000, 0.001);
+    s.vel = (target - s.lastAngle) / dt;
+    s.lastAngle = target;
+    s.lastT = now;
+    s.angle = target;
+  };
+  const onUp = (): void => {
+    st.current.dragging = false;
+  };
+  const onClick = (): void => {
+    // 点击给一个随机方向的冲量,牌子晃起来
+    const s = st.current;
+    if (Math.abs(s.vel) < 1.5) s.vel += (Math.random() > 0.5 ? 1 : -1) * 4.2;
+  };
+
   return (
-    <div className="resume-info-pill">
-      <Icon size={16} aria-hidden="true" />
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div className="resume-nav-badge">
+      <button
+        ref={btnRef}
+        type="button"
+        className="resume-nav-badge-btn"
+        aria-label="张远博 ID 工牌"
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={onUp}
+        onClick={onClick}
+      >
+        <img src={idBadgeAsset} alt="张远博 ID 工牌" draggable={false} />
+      </button>
     </div>
   );
 }
 
-function CapabilityCard({
-  group,
-  index,
-  onAutomationDemo
-}: {
-  group: CapabilityGroup;
-  index: number;
-  onAutomationDemo: (demo: AutomationDemo) => void;
-}): JSX.Element {
-  const Icon = group.icon;
-  const shouldShowAutomationDemo = group.title === "业务运营自动化";
-  return (
-    <article className="resume-capability-card">
-      <div className="resume-card-index">0{index + 1}</div>
-      <div className="resume-capability-head">
-        <span>
-          <Icon size={22} aria-hidden="true" />
-        </span>
-        <div>
-          <h3>{group.title}</h3>
-          <p>{group.subtitle}</p>
-        </div>
-      </div>
-      <ul>
-        {group.items.map((item) => {
-          const demo = shouldShowAutomationDemo ? getAutomationDemoForItem(item) : null;
+function ProjectArchiveSection({ onOpenProject }: { onOpenProject: (slug: string) => void }): JSX.Element {
+  const [archiveRef, archiveVisible] = useRevealOnce<HTMLElement>({
+    threshold: 0.28,
+    rootMargin: "0px 0px -16% 0px",
+    minRatio: 0.24
+  });
+  const projectCount = archiveProjects.length;
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [launchingSlug, setLaunchingSlug] = useState<string | null>(null);
+  const centeredProject = archiveProjects[carouselIndex] ?? archiveProjects[0];
+  const goPrev = (): void => setCarouselIndex((i) => (i - 1 + projectCount) % projectCount);
+  const goNext = (): void => setCarouselIndex((i) => (i + 1) % projectCount);
 
+  const launchProject = (slug: string): void => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      onOpenProject(slug);
+      return;
+    }
+    setLaunchingSlug(slug);
+    window.setTimeout(() => onOpenProject(slug), 470);
+    window.setTimeout(() => setLaunchingSlug(null), 900);
+  };
+
+  const cardOffset = (i: number): number => {
+    let off = (i - carouselIndex + projectCount) % projectCount;
+    if (off > projectCount / 2) off -= projectCount;
+    return off;
+  };
+
+  const cardStyle = (off: number): CSSProperties => {
+    const abs = Math.min(Math.abs(off), 3);
+    const sign = Math.sign(off);
+    if (abs > 2) {
+      return {
+        opacity: 0,
+        pointerEvents: "none",
+        transform: "translateX(-50%) scale(0.6)",
+        zIndex: 1
+      };
+    }
+    const xStep = [0, 70, 124][abs];
+    const yStep = [0, 26, 56][abs];
+    const scale = [1, 0.86, 0.72][abs];
+    const rotate = [0, 6, 10][abs] * sign;
+    const opacity = [1, 0.72, 0.72][abs];
+    const dim = [1, 0.9, 0.78][abs];
+    return {
+      transform: `translateX(calc(-50% + ${sign * xStep}%)) translateY(${yStep}px) scale(${scale}) rotate(${rotate}deg)`,
+      opacity,
+      zIndex: 5 - abs,
+      filter: abs === 0 ? "none" : `brightness(${dim})`
+    } as CSSProperties;
+  };
+
+  return (
+    <section
+      ref={archiveRef}
+      className={`resume-screen resume-project-archive-direct${archiveVisible ? " is-visible" : ""}`}
+      id="resume-project-archive"
+      aria-labelledby="resume-project-archive-title"
+    >
+      <div className="resume-project-archive-backdrop" aria-hidden="true">
+        <span className="resume-project-archive-node resume-project-archive-node--1" />
+        <span className="resume-project-archive-node resume-project-archive-node--2" />
+        <span className="resume-project-archive-node resume-project-archive-node--3" />
+        <span className="resume-project-archive-node resume-project-archive-node--4" />
+        <span className="resume-project-archive-node resume-project-archive-node--5" />
+      </div>
+      <div className="resume-project-archive-shade" aria-hidden="true" />
+      <div className="resume-project-archive-frame" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+
+      <div className="resume-project-archive-brand" aria-hidden="true">
+        <span>03</span>
+        <strong>PROJECT EXPERIENCE</strong>
+      </div>
+
+      <div className="resume-project-archive-left-copy">
+        <div className="resume-project-archive-left-kicker">
+          <span>03</span>
+          <strong>PROJECT EXPERIENCE</strong>
+        </div>
+        <h2 id="resume-project-archive-title">项目交付档案</h2>
+        <p>{"\u9009\u62e9\u4e00\u4e2a\u9879\u76ee\u6863\u6848\uff0c\u67e5\u770b\u4e1a\u52a1\u95ee\u9898\u3001\u5de5\u4f5c\u6d41\u52a8\u4f5c\u3001\u53ef\u5c55\u793a\u8bc1\u636e\u4e0e\u4ea4\u4ed8\u8fb9\u754c\u3002"}</p>
+      </div>
+
+      <div className="resume-project-archive-card-deck" aria-label="\u9879\u76ee\u6863\u6848\u5361">
+        {archiveProjects.map((project, i) => {
+          const off = cardOffset(i);
+          const isCenter = off === 0;
+          const detailSlug = (project as { detailSlug?: string }).detailSlug;
+          const detailHref = detailSlug ? getAppRouteHref(`projects/${detailSlug}`) : "#resume-director";
+          const isLaunching = launchingSlug === detailSlug && detailSlug != null;
+          const isAiContentOpsCard = detailSlug === "ai-content-ops";
           return (
-            <li className={demo ? "has-demo-action" : undefined} key={item}>
-              <CheckCircle2 size={14} aria-hidden="true" />
-              <span>{item}</span>
-              {demo && (
-                <button className="resume-capability-demo-button" type="button" onClick={() => onAutomationDemo(demo)}>
-                  查看演示
-                </button>
+            <a
+              className={`resume-project-archive-card${isAiContentOpsCard ? " resume-project-archive-card--content-ops" : ""}${isCenter ? " is-active" : ""}${isLaunching ? " is-launching" : ""}`}
+              href={detailHref}
+              key={project.title}
+              style={cardStyle(off)}
+              aria-label={isCenter ? `??${project.title}` : `???${project.title}`}
+              aria-hidden={Math.abs(off) > 2}
+              tabIndex={isCenter ? 0 : -1}
+              onClick={(e) => {
+                if (!isCenter) {
+                  e.preventDefault();
+                  setCarouselIndex(i);
+                  return;
+                }
+                if (detailSlug) {
+                  e.preventDefault();
+                  launchProject(detailSlug);
+                }
+              }}
+            >
+              <span className="resume-project-archive-card-index">{project.index}</span>
+              <h3>{project.title}</h3>
+              {project.problem && (
+                <span className="resume-card-seg"><em>{"\u4e1a\u52a1\u95ee\u9898"}</em>{project.problem}</span>
               )}
-            </li>
+              {project.flow && (
+                <span className="resume-card-seg"><em>{"\u5de5\u4f5c\u6d41\u52a8\u4f5c"}</em>{project.flow}</span>
+              )}
+              {project.proof && (
+                <span className="resume-card-seg resume-card-seg--proof"><em>{"\u53ef\u5c55\u793a\u8bc1\u636e"}</em>{project.proof}</span>
+              )}
+              <span className="resume-project-archive-card-tags">
+                {project.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </span>
+              <span className="resume-project-archive-card-action">{"\u67e5\u770b\u9879\u76ee\u8be6\u60c5 \u2192"}</span>
+            </a>
           );
         })}
-      </ul>
-    </article>
-  );
-}
+      </div>
 
-function AutomationCaseCard({
-  item,
-  index,
-  onAutomationDemo
-}: {
-  item: AutomationCase;
-  index: number;
-  onAutomationDemo: (demo: AutomationDemo) => void;
-}): JSX.Element {
-  const Icon = item.icon;
-  const demo = item.demo;
-  return (
-    <article className="resume-ops-card">
-      <div className="resume-ops-card-head">
-        <span>OPS 0{index + 1}</span>
-        <Icon size={24} aria-hidden="true" />
-      </div>
-      <h3>{item.title}</h3>
-      <strong>{item.scene}</strong>
-      <p>{item.description}</p>
-      <div className="resume-ops-card-grid">
-        <div>
-          <h4>自动化动作</h4>
-          <ul>
-            {item.actions.map((action) => (
-              <li key={action}>{action}</li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h4>业务价值</h4>
-          <ul>
-            {item.value.map((value) => (
-              <li key={value}>{value}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      <div className="resume-ops-proof">
-        {item.proof.map((proof) => (
-          <span key={proof}>{proof}</span>
-        ))}
-      </div>
-      {demo && (
-        <button className="resume-ops-demo-button" type="button" onClick={() => onAutomationDemo(demo)}>
-          <PlayCircle size={15} aria-hidden="true" />
-          查看演示视频
+      <div className="resume-archive-carousel-nav">
+        <button type="button" className="resume-archive-carousel-btn" onClick={goPrev} aria-label="\u4e0a\u4e00\u4e2a\u9879\u76ee">
+          {"\u2039"}
         </button>
-      )}
-      <div className="resume-ops-tags">
-        {item.tags.map((tag) => (
-          <span key={tag}>{tag}</span>
-        ))}
-      </div>
-    </article>
-  );
-}
-
-function ProjectCard({
-  project,
-  index,
-  onImagePreview,
-  onVideoPlay
-}: {
-  project: ProjectItem;
-  index: number;
-  onImagePreview: (image: ImagePreview) => void;
-  onVideoPlay: (video: { title: string; description: string; videoHref: string }) => void;
-}): JSX.Element {
-  const Icon = project.icon;
-  const isConsoleProject = project.kind === "comicConsole";
-  return (
-    <article className="resume-project-card">
-      <div className="resume-project-topline">
-        <div className="resume-project-marker">PROJECT 0{index + 1}</div>
-        <span>{project.focus}</span>
-      </div>
-      <div className="resume-project-head">
-        <span>
-          <Icon size={24} aria-hidden="true" />
-        </span>
-        <div>
-          <h3>{project.title}</h3>
-          <p>{project.subtitle}</p>
-        </div>
-      </div>
-
-      <div className="resume-project-summary">
-        <strong>CASE SUMMARY</strong>
-        <p>{project.summary}</p>
-      </div>
-
-      {project.metrics && (
-        <div className="resume-project-metrics" aria-label={`${project.title}关键指标`}>
-          {project.metrics.map((metric) => (
-            <div className="resume-project-metric" key={`${metric.value}-${metric.label}`}>
-              <strong>{metric.value}</strong>
-              <span>{metric.label}</span>
-              {metric.note && <p>{metric.note}</p>}
-              {metric.proof && (
-                <button
-                  type="button"
-                  className="resume-metric-proof-button"
-                  onClick={() => {
-                    if (metric.proof) {
-                      onImagePreview(metric.proof);
-                    }
-                  }}
-                >
-                  <Search size={13} aria-hidden="true" />
-                  查看截图
-                </button>
-              )}
-            </div>
+        <span className="resume-archive-carousel-dots">
+          {archiveProjects.map((project, i) => (
+            <span key={project.title} className={`resume-archive-carousel-dot${i === carouselIndex ? " is-active" : ""}`} />
           ))}
-        </div>
-      )}
-
-      {project.demoVideo && (
-        <div className="resume-project-demo-video" aria-label={`${project.title}演示视频`}>
-          <div className="resume-project-demo-head">
-            <span>WORKFLOW DEMO</span>
-            <strong>工作流演示视频</strong>
-          </div>
-          <button
-            className="resume-project-demo-button"
-            type="button"
-            onClick={() => onVideoPlay(project.demoVideo!)}
-            aria-label={`播放${project.title}演示视频`}
-          >
-            <PlayCircle size={18} aria-hidden="true" />
-            <span>查看完整工作流演示</span>
-          </button>
-        </div>
-      )}
-
-      {isConsoleProject && (
-        <div className="resume-console-showcase" aria-label="AI漫剧自动化生产控制台系统证据">
-          <div className="resume-console-showcase-head">
-            <span>PRODUCT EVIDENCE</span>
-            <strong>从小说到视频任务的本地生产控制台</strong>
-            <p>这部分展示的是工具落地能力，不是单纯的 AIGC 作品展示。</p>
-            <div className="resume-console-links" aria-label="AI漫剧自动化生产控制台公开链接">
-              <a href={aiComicConsoleGithubHref} target="_blank" rel="noreferrer">
-                查看 GitHub 仓库
-              </a>
-              <span>公开版本已脱敏，保留 AI 协作开发、Agent 规则和 Dreamina CLI 工作流结构</span>
-            </div>
-          </div>
-          <div className="resume-console-flow">
-            {consoleEvidenceSteps.map((item) => (
-              <article className="resume-console-flow-card" key={item.step}>
-                <span>{item.step}</span>
-                <strong>{item.title}</strong>
-                <em>{item.label}</em>
-                <p>{item.description}</p>
-              </article>
-            ))}
-          </div>
-          <div className="resume-console-proof-strip">
-            {consoleImplementationProof.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-          <div className="resume-console-screenshots" aria-label="AI漫剧自动化控制台界面截图">
-            <div className="resume-console-screenshots-head">
-              <span>CONSOLE SCREENS</span>
-              <strong>平台界面截图</strong>
-            </div>
-            <div className="resume-console-screenshot-grid">
-              {consoleScreenshots.map((shot) => (
-                <figure className="resume-console-screenshot-card" key={shot.title}>
-                  <button type="button" onClick={() => onImagePreview(shot)} aria-label={`放大查看 ${shot.title}`}>
-                    <img src={shot.src} alt={`AI漫剧自动化控制台 - ${shot.title}`} loading="lazy" />
-                    <span>点击放大</span>
-                  </button>
-                  <figcaption>
-                    <strong>{shot.title}</strong>
-                    <span>{shot.description}</span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-          <div className="resume-dify-showcase" aria-label="Dify 轻量知识库原型">
-            <div className="resume-dify-copy">
-              <span>RAG PROTOTYPE</span>
-              <strong>Dify 轻量知识库原型</strong>
-              <p>
-                基于 Dify 搭建 AIGC 短视频生产规则知识库，将工作流文档拆分为资产分析、人物/场景生成规则、视频任务生成规则和任务质检规则，用于验证 RAG 规则检索在 AI 漫剧生产流程中的可用性。
-              </p>
-              <div className="resume-dify-tags" aria-label="Dify 原型能力标签">
-                <span>规则知识库</span>
-                <span>资产分析</span>
-                <span>视频任务生成</span>
-                <span>执行前质检</span>
-              </div>
-            </div>
-            <div className="resume-dify-proof-grid">
-              {difyKnowledgeScreenshots.map((shot) => (
-                <figure className="resume-dify-proof-card" key={shot.title}>
-                  <button type="button" onClick={() => onImagePreview(shot)} aria-label={`放大查看 ${shot.title}`}>
-                    <img src={shot.src} alt={`Dify 轻量知识库原型 - ${shot.title}`} loading="lazy" />
-                    <span>点击放大</span>
-                  </button>
-                  <figcaption>
-                    <strong>{shot.title}</strong>
-                    <span>{shot.description}</span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {project.screenshots && (
-        <div className="resume-project-proof-media" aria-label={`${project.title}证据截图`}>
-          <div className="resume-console-screenshots-head">
-            <span>PROOF SCREENS</span>
-            <strong>证据截图</strong>
-          </div>
-          <div className="resume-project-proof-grid">
-            {project.screenshots.map((shot) => (
-              <figure className="resume-project-proof-card" key={shot.title}>
-                <button type="button" onClick={() => onImagePreview(shot)} aria-label={`放大查看 ${shot.title}`}>
-                  <img src={shot.src} alt={`${project.title} - ${shot.title}`} loading="lazy" />
-                  <span>点击放大</span>
-                </button>
-                <figcaption>
-                  <strong>{shot.title}</strong>
-                  <span>{shot.description}</span>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <p className="resume-project-background">{project.background}</p>
-
-      <div className="resume-project-grid">
-        <div className="resume-project-detail-block">
-          <h4>我负责什么</h4>
-          <ul>
-            {project.responsibilities.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="resume-project-detail-block is-value">
-          <h4>结果 / 价值</h4>
-          <ul>
-            {project.values.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
+        </span>
+        <button type="button" className="resume-archive-carousel-btn" onClick={goNext} aria-label="\u4e0b\u4e00\u4e2a\u9879\u76ee">
+          {"\u203a"}
+        </button>
       </div>
 
-      {(project.tools || project.platforms || project.proof) && (
-        <div className="resume-project-evidence">
-          {project.tools && (
-            <div>
-              <h4>使用工具</h4>
-              <div className="resume-mini-tags">
-                {project.tools.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
-            </div>
-          )}
-          {project.platforms && (
-            <div>
-              <h4>平台经验</h4>
-              <div className="resume-mini-tags">
-                {project.platforms.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
-            </div>
-          )}
-          {project.proof && (
-            <div className="resume-proof-list">
-              <h4>可验证证据</h4>
-              {project.proof.map((item) => (
-                <p key={item}>{item}</p>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </article>
+      <div className="resume-project-archive-status" aria-hidden="true">
+        <span>{"\u5f53\u524d\u8f7d\u5165\uff1a" + centeredProject.label}</span>
+      </div>
+    </section>
   );
 }
 
@@ -943,55 +599,395 @@ function DirectorWorkCard({
       </div>
       <div className="resume-director-card-copy">
         <div className="resume-director-card-head">
-          <span>{work.status}</span>
+          <span>{work.type}</span>
           <h3>{work.title}</h3>
           <p>{work.description}</p>
         </div>
-
-        <div className="resume-director-card-grid">
-          <div>
-            <h4>我负责</h4>
-            <div className="resume-mini-tags">
-              {work.role.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h4>使用工具</h4>
-            <div className="resume-mini-tags">
-              {work.tools.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-            </div>
-          </div>
+        <div className="resume-director-card-tags">
+          {[...work.role.slice(0, 2), ...work.tools.slice(0, 3)].map((item) => (
+            <span key={item}>{item}</span>
+          ))}
         </div>
       </div>
     </article>
   );
 }
 
-export default function ResumePage(): JSX.Element {
-  const [activeDirectorWork, setActiveDirectorWork] = useState<DirectorWork | null>(null);
-  const [activeAutomationDemo, setActiveAutomationDemo] = useState<AutomationDemo | null>(null);
-  const [activeImagePreview, setActiveImagePreview] = useState<ImagePreview | null>(null);
-  const [activeProjectVideo, setActiveProjectVideo] = useState<{ title: string; description: string; videoHref: string } | null>(null);
+function DirectorReel({
+  clips,
+  onPlay
+}: {
+  clips: DirectorReelClip[];
+  onPlay: (work: DirectorWork) => void;
+}): JSX.Element {
+  const openClip = (clip: DirectorReelClip): void => {
+    onPlay({
+      ...clip,
+      type: "AI Reel Reserve",
+      description: "第 4 屏横向循环作品储备片段，用于快速查看更多 AI 影像输出。",
+      role: [],
+      tools: [],
+      status: "循环片段预览"
+    });
+  };
 
-  function downloadResumeFile(): void {
-    const link = document.createElement("a");
-    link.href = resumePdfHref;
-    link.download = resumePdfFileName;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  }
+  return (
+    <div className="resume-director-reel" aria-label="AI 影像片段循环展示">
+      <div className="resume-director-reel-track">
+        {[0, 1].map((groupIndex) => (
+          <div
+            className="resume-director-reel-sequence"
+            aria-hidden={groupIndex === 1 ? true : undefined}
+            key={"director-reel-sequence-" + groupIndex}
+          >
+            {clips.map((clip, clipIndex) => (
+              <button
+                className="resume-director-reel-item"
+                type="button"
+                onClick={() => openClip(clip)}
+                tabIndex={groupIndex === 1 ? -1 : undefined}
+                aria-label={"播放 " + clip.title}
+                key={groupIndex + "-" + clip.title}
+              >
+                <video
+                  className="resume-director-reel-video"
+                  src={clip.videoSrc}
+                  poster={clip.posterSrc}
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  preload="metadata"
+                />
+                <span className="resume-director-reel-meta" aria-hidden="true">
+                  <span>{"R0" + (clipIndex + 1)}</span>
+                  <strong>{clip.duration}</strong>
+                </span>
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+type RevealOptions = {
+  threshold?: number;
+  rootMargin?: string;
+  minRatio?: number;
+};
+
+function useRevealOnce<T extends HTMLElement>({
+  threshold = 0.34,
+  rootMargin = "0px 0px -22% 0px",
+  minRatio = 0.28
+}: RevealOptions = {}): [React.RefObject<T>, boolean] {
+  const ref = useRef<T>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= minRatio) {
+            setVisible(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold, rootMargin }
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, [threshold, rootMargin, minRatio]);
+
+  return [ref, visible];
+}
+
+function RearScreen({
+  id,
+  className,
+  children
+}: {
+  id?: string;
+  className?: string;
+  children: React.ReactNode;
+}): JSX.Element {
+  const [ref, visible] = useRevealOnce<HTMLElement>({
+    threshold: 0.36,
+    rootMargin: "0px 0px -22% 0px",
+    minRatio: 0.3
+  });
+
+  return (
+    <section
+      ref={ref}
+      id={id}
+      className={`resume-rear-screen ${className ?? ""}${visible ? " is-visible" : ""}`}
+    >
+      <span className="cap-hud cap-hud-tl" aria-hidden="true" />
+      <span className="cap-hud cap-hud-tr" aria-hidden="true" />
+      <span className="cap-hud cap-hud-bl" aria-hidden="true" />
+      <span className="cap-hud cap-hud-br" aria-hidden="true" />
+      {children}
+    </section>
+  );
+}
+
+export default function ResumePage(): JSX.Element {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [activeDirectorWork, setActiveDirectorWork] = useState<DirectorWork | null>(null);
+  const [activeImagePreview, setActiveImagePreview] = useState<ImagePreview | null>(null);
+  const [activeProjectSlug, setActiveProjectSlug] = useState<string | null>(null);
+  const [activeNavHref, setActiveNavHref] = useState("#resume-hero");
+  const heroRef = useRef<HTMLElement | null>(null);
+  const heroPanelRef = useRef<HTMLDivElement | null>(null);
+  const [directorRef, directorVisible] = useRevealOnce<HTMLElement>({
+    threshold: 0.24,
+    rootMargin: "0px 0px -14% 0px",
+    minRatio: 0.22
+  });
+
+
+  const openProject = (slug: string): void => {
+    if (!hasProjectCase(slug)) {
+      window.location.assign(getAppRouteHref(`projects/${slug}`));
+      return;
+    }
+    window.history.pushState({ projectSlug: slug }, "", getAppRouteHref(`projects/${slug}`));
+    setActiveProjectSlug(slug);
+  };
+
+  const closeProject = (): void => {
+    window.history.back();
+  };
+
+  useEffect(() => {
+    const onPop = (): void => {
+      const m = window.location.pathname.replace(/\/+$/, "").match(/(?:^|\/)projects\/([^/]+)$/);
+      const slug = m && hasProjectCase(m[1]) ? m[1] : null;
+      setActiveProjectSlug(slug);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  useEffect(() => {
+    if (activeProjectSlug) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+    return undefined;
+  }, [activeProjectSlug]);
+
+  useEffect(() => {
+    const syncNavHash = (): void => {
+      const nextHash = window.location.hash || "#resume-hero";
+      if (resumeNavItems.some((item) => item.href === nextHash)) {
+        setActiveNavHref(nextHash);
+      }
+    };
+
+    syncNavHash();
+    window.addEventListener("hashchange", syncNavHash);
+    return () => window.removeEventListener("hashchange", syncNavHash);
+  }, []);
+
+  useEffect(() => {
+    let secondFrame: number | null = null;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        setIsLoaded(true);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame !== null) {
+        window.cancelAnimationFrame(secondFrame);
+      }
+    };
+  }, []);
+
+  // Hero 桌面端鼠标视差:pointermove 记录目标值,rAF lerp 平滑,写入 CSS variables
+  // - 移动端(<=767px)与 prefers-reduced-motion: reduce 都早退,不绑事件、不起 rAF
+  // - 鼠标离开 → 平滑归零
+  useEffect(() => {
+    const node = heroRef.current;
+    if (!node) return;
+
+    // 早退:粗指针 / 窄屏 / 减少动效
+    const mqlReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mqlNarrow = window.matchMedia("(max-width: 767px)");
+    const mqlCoarse = window.matchMedia("(pointer: coarse)");
+    if (mqlReduce.matches || mqlNarrow.matches || mqlCoarse.matches) {
+      node.style.setProperty("--hero-mx", "0");
+      node.style.setProperty("--hero-my", "0");
+      node.style.setProperty("--hero-tilt-x", "0deg");
+      node.style.setProperty("--hero-tilt-y", "0deg");
+      node.style.setProperty("--hero-pan-x", "0px");
+      node.style.setProperty("--hero-pan-y", "0px");
+      node.style.setProperty("--hero-panel-tilt-x", "0deg");
+      node.style.setProperty("--hero-panel-tilt-y", "0deg");
+      node.style.setProperty("--hero-panel-shift-x", "0px");
+      node.style.setProperty("--hero-panel-shift-y", "0px");
+      heroPanelRef.current?.style.setProperty("--hero-panel-tilt-x", "0deg");
+      heroPanelRef.current?.style.setProperty("--hero-panel-tilt-y", "0deg");
+      heroPanelRef.current?.style.setProperty("--hero-panel-shift-x", "0px");
+      heroPanelRef.current?.style.setProperty("--hero-panel-shift-y", "0px");
+      return;
+    }
+
+    // 目标 (-1, 1),当前 (-1, 1) — 用 lerp 缓慢追
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    const lerp = 0.08;
+    const epsilon = 0.001;
+    let raf: number | null = null;
+    let stillFrames = 0;
+
+    const writeVars = (): void => {
+      // 全局位移强度因子,所有具体动画在 CSS 里再乘自己的最大幅度
+      node.style.setProperty("--hero-mx", currentX.toFixed(4));
+      node.style.setProperty("--hero-my", currentY.toFixed(4));
+      // 给 CSS 现成的角度/像素值,避免 calc 链太长
+      node.style.setProperty("--hero-tilt-x", `${(currentY * -2.5).toFixed(3)}deg`);
+      node.style.setProperty("--hero-tilt-y", `${(currentX * 2.5).toFixed(3)}deg`);
+      node.style.setProperty("--hero-pan-x", `${(currentX * 12).toFixed(2)}px`);
+      node.style.setProperty("--hero-pan-y", `${(currentY * 12).toFixed(2)}px`);
+      const panelTiltX = `${(currentY * -5.2).toFixed(3)}deg`;
+      const panelTiltY = `${(currentX * 5.2).toFixed(3)}deg`;
+      const panelShiftX = `${(currentX * 8).toFixed(2)}px`;
+      const panelShiftY = `${(currentY * 5).toFixed(2)}px`;
+      node.style.setProperty("--hero-panel-tilt-x", panelTiltX);
+      node.style.setProperty("--hero-panel-tilt-y", panelTiltY);
+      node.style.setProperty("--hero-panel-shift-x", panelShiftX);
+      node.style.setProperty("--hero-panel-shift-y", panelShiftY);
+      const panelNode = heroPanelRef.current;
+      if (panelNode) {
+        panelNode.style.setProperty("--hero-panel-tilt-x", panelTiltX);
+        panelNode.style.setProperty("--hero-panel-tilt-y", panelTiltY);
+        panelNode.style.setProperty("--hero-panel-shift-x", panelShiftX);
+        panelNode.style.setProperty("--hero-panel-shift-y", panelShiftY);
+      }
+    };
+
+    const tick = (): void => {
+      const dx = targetX - currentX;
+      const dy = targetY - currentY;
+      currentX += dx * lerp;
+      currentY += dy * lerp;
+      writeVars();
+      // 接近静止时,跳出循环节省 CPU
+      if (Math.abs(dx) < epsilon && Math.abs(dy) < epsilon) {
+        stillFrames += 1;
+        if (stillFrames >= 6) {
+          // snap 归位再退出
+          currentX = targetX;
+          currentY = targetY;
+          writeVars();
+          raf = null;
+          return;
+        }
+      } else {
+        stillFrames = 0;
+      }
+      raf = window.requestAnimationFrame(tick);
+    };
+
+    const ensureRunning = (): void => {
+      if (raf === null) {
+        raf = window.requestAnimationFrame(tick);
+      }
+    };
+
+    const handlePointerMove = (e: PointerEvent): void => {
+      if (e.pointerType === "touch") return;
+      const rect = node.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      // 映射到 (-1, 1),边角取 ±1
+      targetX = Math.max(-1, Math.min(1, x * 2 - 1));
+      targetY = Math.max(-1, Math.min(1, y * 2 - 1));
+      ensureRunning();
+    };
+
+    const handlePointerLeave = (): void => {
+      targetX = 0;
+      targetY = 0;
+      // 强制贴近 0,避免 lerp 长尾停在 ~0.05deg
+      if (Math.abs(currentX) < 0.06 && Math.abs(currentY) < 0.06) {
+        currentX = 0;
+        currentY = 0;
+        writeVars();
+        return;
+      }
+      ensureRunning();
+    };
+
+    // 媒体查询变化时(用户切换深色模式 / 改系统设置)实时同步,简单粗暴重渲染
+    const handleMediaChange = (): void => {
+      if (mqlReduce.matches || mqlNarrow.matches || mqlCoarse.matches) {
+        targetX = 0;
+        targetY = 0;
+        ensureRunning();
+      }
+    };
+
+    node.addEventListener("pointermove", handlePointerMove);
+    node.addEventListener("pointerleave", handlePointerLeave);
+    mqlReduce.addEventListener?.("change", handleMediaChange);
+    mqlNarrow.addEventListener?.("change", handleMediaChange);
+    mqlCoarse.addEventListener?.("change", handleMediaChange);
+    // 初始化变量
+    writeVars();
+
+    return () => {
+      node.removeEventListener("pointermove", handlePointerMove);
+      node.removeEventListener("pointerleave", handlePointerLeave);
+      mqlReduce.removeEventListener?.("change", handleMediaChange);
+      mqlNarrow.removeEventListener?.("change", handleMediaChange);
+      mqlCoarse.removeEventListener?.("change", handleMediaChange);
+      if (raf !== null) window.cancelAnimationFrame(raf);
+    };
+  }, []);
 
   function showContactPhone(): void {
     window.alert(`联系方式：${contactPhone}`);
   }
 
+  function handleNavSelect(href: string): void {
+    setActiveNavHref(href);
+    if (window.location.hash === href) {
+      document.querySelector<HTMLElement>(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    window.location.hash = href;
+  }
+
   return (
     <main className="resume-page" aria-label="张远博个人简历">
+      {/* Global pixel trail layer */}
+      <PixelTrail />
+      <div className="resume-global-system-backdrop" aria-hidden="true">
+        <div
+          className="resume-global-system-bg"
+          style={{ backgroundImage: `url(${section2CityBgAsset})` }}
+        />
+        <Section2Ambient />
+        <span className="resume-global-system-grid" />
+        <span className="resume-global-system-vignette" />
+      </div>
       <div className="resume-bg-grid" aria-hidden="true" />
       <div className="resume-bg-lines" aria-hidden="true" />
       <div className="resume-bg-glow resume-bg-glow-cyan" aria-hidden="true" />
@@ -1029,344 +1025,418 @@ export default function ResumePage(): JSX.Element {
         </div>
       </div>
 
-      <nav className="resume-nav" aria-label="简历导航">
-        <a className="resume-back-link" href={profileOverviewHref} aria-label="返回候选人档案总览">
-          <ArrowLeft size={15} aria-hidden="true" />
-          返回总览
+      <nav className="resume-nav resume-nav--overlay" aria-label="作品集导航">
+        <a className="resume-nav-brand" href="#resume-hero" aria-label="返回首页">
+          <span>YUANBO ZHANG</span>
+          <strong>PORTFOLIO</strong>
         </a>
-        <div className="resume-nav-brand">
-          <span>CANDIDATE RESUME</span>
-          <strong>READING TERMINAL</strong>
-        </div>
-        <button className="resume-nav-contact" type="button" onClick={showContactPhone}>
-          <Mail size={14} aria-hidden="true" />
-          联系我
-        </button>
+        <Dock
+          className="resume-nav-dock"
+          aria-label="作品集导航"
+          items={resumeNavItems.map(({ label, href }) => ({
+            label,
+            onClick: () => handleNavSelect(href),
+            className: activeNavHref === href ? "is-active" : undefined
+          }))}
+          distance={126}
+          panelHeight={46}
+          baseItemSize={32}
+          dockHeight={64}
+          magnification={1.14}
+        />
       </nav>
+      <HangingBadge />
 
-      <section className="resume-hero resume-screen" aria-labelledby="resume-hero-title">
-        <div className="resume-hero-copy">
-          <SectionKicker index="01" label="Candidate Positioning" />
-          <h1 id="resume-hero-title">张远博</h1>
-          <h2>AI工作流落地 / 业务运营自动化 / AIGC内容生产提效</h2>
-          <p className="resume-hero-statement">
-            把服装电商主图生成、宣传视频延展、自媒体运营、岗位筛选和知识沉淀这些重复流程，拆成规则、脚本、Agent 流程和可演示工具。
-          </p>
+      <section
+        id="resume-hero"
+        ref={heroRef}
+        className={`resume-hero resume-screen resume-lockscreen resume-hero--overlay${isLoaded ? " is-loaded" : ""}`}
+        aria-labelledby="resume-hero-title"
+      >
+        <video
+          className="resume-lock-bg-video"
+          src={heroLockVideoAsset}
+          poster={heroLockBgAsset}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+        />
+        <img className="resume-lock-bg-asset" src={heroLockBgAsset} alt="" aria-hidden="true" />
+        <div className="resume-lock-frame" aria-hidden="true" />
 
-          <div className="resume-quick-read" aria-label="30秒看懂我">
-            <span>核心展示</span>
-            <p>更适合需要把电商视觉素材生产、重复网页动作、内容生产流程和 AI 对话沉淀做成可执行工作流的团队。</p>
-            <ul>
-              {heroProofItems.map((item) => (
-                <li key={item}>
-                  <CheckCircle2 size={14} aria-hidden="true" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="resume-hero-actions">
-            <button type="button" onClick={showContactPhone}>
-              <MessageSquare size={16} aria-hidden="true" />
-              联系我
-            </button>
-            <a href="#resume-projects">
-              <Briefcase size={16} aria-hidden="true" />
-              查看项目
-            </a>
-            <button type="button" onClick={downloadResumeFile}>
-              <Download size={16} aria-hidden="true" />
-              下载简历
-            </button>
-          </div>
+        <div className="resume-hero-overlay" aria-hidden="true">
+          <span className="resume-hero-hud resume-hero-hud-tl" />
+          <span className="resume-hero-hud resume-hero-hud-tr" />
+          <span className="resume-hero-hud resume-hero-hud-bl" />
+          <span className="resume-hero-hud resume-hero-hud-br" />
         </div>
 
-        <aside className="resume-hero-card" aria-label="候选人身份档案">
-          <div className="resume-card-label">IDENTITY FILE · ZYB-2025-0426</div>
-          <div className="resume-avatar-shell">
-            <img src={avatarOrbAsset} alt="张远博头像" />
-          </div>
-          <div className="resume-profile-lines">
-            <span>ROLE FOCUS</span>
-            <strong>AI工作流落地 / 业务自动化</strong>
-            <p>把个人痛点里的流程问题，沉淀成可演示、可复盘、可迁移的工具原型。</p>
-          </div>
-          <div className="resume-keyword-cloud">
-            {targetKeywords.map((keyword) => (
-              <span key={keyword}>{keyword}</span>
-            ))}
-          </div>
-        </aside>
-      </section>
+        <div className="resume-hero-stage">
+          {/* 主身份 HUD 面板 */}
+          <div ref={heroPanelRef} className="resume-hero-panel" role="group" aria-labelledby="resume-hero-title">
+            <span className="resume-hero-panel-aura" aria-hidden="true" />
+            <span className="resume-hero-panel-frame resume-hero-panel-frame--outer" aria-hidden="true" />
+            <span className="resume-hero-panel-rim" aria-hidden="true" />
+            <span className="resume-hero-panel-node resume-hero-panel-node--top" aria-hidden="true" />
+            <span className="resume-hero-panel-node resume-hero-panel-node--bottom" aria-hidden="true" />
+            <span className="resume-hero-panel-node resume-hero-panel-node--left" aria-hidden="true" />
+            <span className="resume-hero-panel-node resume-hero-panel-node--right" aria-hidden="true" />
+            <span className="resume-hero-panel-scanlines" aria-hidden="true" />
 
-      <section className="resume-screen resume-about" aria-labelledby="resume-about-title">
-        <div className="resume-section-copy">
-          <SectionKicker index="02" label="About Me" />
-          <h2 id="resume-about-title">关于我</h2>
-          <div className="resume-about-focus" aria-label="核心定位关键词">
-            {aboutFocusItems.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-          <p>
-            我更关注“AI 怎么进入真实业务流程”：把电商视觉素材生产、内容判断、平台运营经验、网页自动化和 AI 工具结合起来，拆解主图生成、宣传视频延展、自媒体运营、岗位筛选、项目情报和知识沉淀这些高频流程。
-          </p>
-          <p>
-            当前主要用 Codex、Cursor、Hermes、Obsidian、Tabbit、Coze、Dify、即梦、Seedance 等工具，把零散 AI 操作整理成可复用的脚本、SOP、知识库和轻量半自动工作流。
-          </p>
-        </div>
-
-        <div className="resume-workflow-panel" aria-label="内容生产工作流">
-          <div className="resume-panel-head">
-            <Layers size={18} aria-hidden="true" />
-            <span>BUSINESS TO AI WORKFLOW</span>
-          </div>
-          <div className="resume-workflow-track">
-            {workflowSteps.map((step, index) => (
-              <div className="resume-workflow-step" key={step}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{step}</strong>
+            {/* Left: round avatar orb with bottom-up projection beam */}
+            <TiltedCard
+              rotateAmplitude={14}
+              scaleOnHover={1.06}
+              captionText="ID·ZYB-2024 · AI Workflow Engineer"
+              containerWidth="100%"
+              contentWidth="100%"
+              className="resume-avatar-orb-tilt"
+            >
+              <div className="resume-avatar-orb" aria-hidden="true">
+              <div className="resume-avatar-ring">
+                <span className="resume-avatar-ring-glow" aria-hidden="true" />
+                <span className="resume-avatar-ring-outer" aria-hidden="true" />
+                <span className="resume-avatar-ring-track" aria-hidden="true" />
+                <span className="resume-avatar-ring-inner" aria-hidden="true" />
+                <svg className="resume-avatar-ring-arc" viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+                  <path d="M 50 8 A 42 42 0 0 0 8 50" fill="none" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" strokeLinecap="round" />
+                  <path d="M 50 92 A 42 42 0 0 0 92 50" fill="none" stroke="rgba(255,77,255,0.7)" strokeWidth="0.8" strokeLinecap="round" />
+                  <line x1="50" y1="3" x2="50" y2="7" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" />
+                  <line x1="50" y1="93" x2="50" y2="97" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" />
+                  <line x1="3" y1="50" x2="7" y2="50" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" />
+                  <line x1="93" y1="50" x2="97" y2="50" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" />
+                </svg>
+                <span className="resume-avatar-ring-tag" aria-hidden="true">
+                  <i className="resume-avatar-ring-tag-led" />
+                  <span>ID-2024</span>
+                </span>
+                <span className="resume-avatar-ring-tag resume-avatar-ring-tag--right" aria-hidden="true">
+                  <i className="resume-avatar-ring-tag-led resume-avatar-ring-tag-led--mag" />
+                  <span>SYNC·OK</span>
+                </span>
+                <div className="resume-avatar-portrait-wrap">
+                  <span className="resume-avatar-portrait-rim" aria-hidden="true" />
+                  <span className="resume-avatar-portrait-toplight" aria-hidden="true" />
+                  <img
+                    src={candidateAvatarAsset}
+                    className="resume-avatar-portrait"
+                    alt=""
+                    draggable={false}
+                  />
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section className="resume-screen resume-capabilities" aria-labelledby="resume-capability-title">
-        <div className="resume-section-header">
-          <SectionKicker index="03" label="Core Competencies" />
-          <h2 id="resume-capability-title">核心能力</h2>
-          <p>能力围绕业务流程自动化、AIGC 内容生产和知识沉淀展开，重点服务重复操作提效、交付稳定性和复盘迭代。</p>
-        </div>
-        <div className="resume-capability-grid">
-          {capabilityGroups.map((group, index) => (
-            <CapabilityCard group={group} index={index} onAutomationDemo={setActiveAutomationDemo} key={group.title} />
-          ))}
-        </div>
-      </section>
+              <div className="resume-avatar-beam">
+                <span className="resume-avatar-beam-shaft" />
+                <span className="resume-avatar-beam-dust" />
+                <span className="resume-avatar-beam-glow" />
+              </div>
 
-      <section className="resume-screen resume-ops-lab" id="resume-ops-lab" aria-labelledby="resume-ops-title">
-        <div className="resume-section-header">
-          <SectionKicker index="04" label="Business Automation Lab" />
-          <h2 id="resume-ops-title">业务运营自动化脚本集</h2>
-          <p>
-            这组工具面向自媒体运营、岗位筛选和项目调研中的高频重复网页操作，把人工点击、筛选、记录和复盘整理成可演示的自动化流程，减少重复劳动，提高运营和信息收集效率。
-          </p>
-        </div>
-        <div className="resume-ops-overview" aria-label="业务运营自动化整体流程">
-          <div>
-            <Search size={18} aria-hidden="true" />
-            <span>识别业务场景</span>
-          </div>
-          <div>
-            <Layers size={18} aria-hidden="true" />
-            <span>拆成规则与步骤</span>
-          </div>
-          <div>
-            <Repeat size={18} aria-hidden="true" />
-            <span>脚本执行重复动作</span>
-          </div>
-          <div>
-            <Database size={18} aria-hidden="true" />
-            <span>记录状态并复盘</span>
-          </div>
-        </div>
-        <div className="resume-ops-grid">
-          {automationCases.map((item, index) => (
-            <AutomationCaseCard item={item} index={index} onAutomationDemo={setActiveAutomationDemo} key={item.title} />
-          ))}
-        </div>
-      </section>
-
-      <section className="resume-screen resume-projects" id="resume-projects" aria-labelledby="resume-project-title">
-        <div className="resume-section-header">
-          <SectionKicker index="05" label="Project Experience" />
-          <h2 id="resume-project-title">项目经历</h2>
-          <p>重点展示电商视觉素材生产、AI 工具协作、AIGC 内容生产、知识库沉淀和企业协作自动化能力，覆盖需求拆解、工具组合、状态复盘和内容交付。</p>
-        </div>
-        <div className="resume-project-list">
-          {projects.map((project, index) => (
-            <ProjectCard project={project} index={index} key={project.title} onImagePreview={setActiveImagePreview} onVideoPlay={setActiveProjectVideo} />
-          ))}
-        </div>
-      </section>
-
-      <section className="resume-screen resume-ai-extension" aria-labelledby="resume-ai-extension-title">
-        <div className="resume-section-header">
-          <SectionKicker index="06" label="Agent Tool Research" />
-          <h2 id="resume-ai-extension-title">AI Agent 工具调研与自动化验证</h2>
-          <p>
-            这部分关注 AI Agent 能不能真正提升工作效率：围绕网页自动化、任务拆解、文件处理和本地工作流，验证不同工具能否减少重复操作、缩短任务处理时间，并服务真实内容生产与运营提效。
-          </p>
-        </div>
-        <div className="resume-ai-extension-grid">
-          <article className="resume-ai-extension-card">
-            <div className="resume-ai-extension-number">01</div>
-            <h3>AI Agent 工具研究</h3>
-            <p>持续研究 OpenClaw、Hermes、小龙虾等 AI Agent 工具，理解它们在插件扩展、网页任务、文件处理和本地工作流中的适用边界。</p>
-            <div className="resume-ai-extension-tags">
-              <span>OpenClaw</span>
-              <span>Hermes</span>
-              <span>小龙虾</span>
-              <span>GitHub 开源项目</span>
+              <div className="resume-avatar-pedestal">
+                <span className="resume-avatar-pedestal-water" />
+                <span className="resume-avatar-pedestal-halo" />
+                <span className="resume-avatar-pedestal-disc resume-avatar-pedestal-disc--outer" />
+                <span className="resume-avatar-pedestal-disc resume-avatar-pedestal-disc--mid" />
+                <span className="resume-avatar-pedestal-flow" />
+              </div>
             </div>
-          </article>
-          <article className="resume-ai-extension-card">
-            <div className="resume-ai-extension-number">02</div>
-            <h3>能力验证流程</h3>
-            <p>从实际任务需求出发，筛选 GitHub 开源项目和插件能力，进行安装配置、功能测试和适配性判断，避免只停留在工具收藏层面。</p>
-            <ul>
-              <li>查找和筛选可用开源项目</li>
-              <li>安装、配置并验证插件能力</li>
-              <li>记录可用场景、限制和失败点</li>
-            </ul>
-          </article>
-          <article className="resume-ai-extension-card">
-            <div className="resume-ai-extension-number">03</div>
-            <h3>工具组合判断</h3>
-            <p>能够根据任务类型判断适合使用 Codex / Cursor、Tabbit、Coze、OpenClaw、Hermes 或 GitHub 开源项目中的哪类能力完成验证。</p>
-            <ul>
-              <li>网页自动化与表单流程</li>
-              <li>Agent 协作与任务拆解</li>
-              <li>本地工具增强与能力补齐</li>
-            </ul>
-          </article>
-        </div>
-      </section>
 
-      <section className="resume-screen resume-boundary" aria-labelledby="resume-boundary-title">
-        <div className="resume-section-header">
-          <SectionKicker index="07" label="Delivery Boundary" />
-          <h2 id="resume-boundary-title">能力边界与协作方式</h2>
-          <p>定位偏业务流程拆解、AI 工具落地和轻量级 AI 工作流原型验证；复杂工程化能力可以与研发协作完成。</p>
-        </div>
-        <div className="resume-boundary-grid">
-          <article className="resume-boundary-card">
-            <span>CAN DELIVER</span>
-            <h3>我能独立完成</h3>
-            <ul>
-              {independentScopes.map((item) => (
-                <li key={item}>
-                  <CheckCircle2 size={14} aria-hidden="true" />
-                  <span>{item}</span>
+            </TiltedCard>
+
+            {/* 右侧:身份信息 */}
+            <div className="resume-hero-info">
+              <span className="resume-hero-kicker" aria-hidden="true">
+                <em>01</em>
+                <i />
+                <span>HOME · YUANBO ZHANG</span>
+              </span>
+              <h1 id="resume-hero-title">张远博</h1>
+              <h2>AI 应用开发 / FDE / AI 工作流落地</h2>
+
+              <ul className="resume-hero-chips" role="list">
+                <li className="resume-hero-chip">
+                  <MapPin size={12} aria-hidden="true" />
+                  杭州
                 </li>
-              ))}
-            </ul>
-          </article>
-          <article className="resume-boundary-card is-collaboration">
-            <span>NEED COLLABORATION</span>
-            <h3>需要研发协作完成</h3>
-            <ul>
-              {collaborationScopes.map((item) => (
-                <li key={item}>
-                  <Rocket size={14} aria-hidden="true" />
-                  <span>{item}</span>
+                <li className="resume-hero-chip">
+                  <Workflow size={12} aria-hidden="true" />
+                  AI 应用落地
                 </li>
-              ))}
-            </ul>
-          </article>
-        </div>
-      </section>
+                <li className="resume-hero-chip">
+                  <ImageIcon size={12} aria-hidden="true" />
+                  电商视觉生成
+                </li>
+                <li className="resume-hero-chip">
+                  <Bot size={12} aria-hidden="true" />
+                  自动化工作流
+                </li>
+              </ul>
 
-      <section className="resume-screen resume-director" aria-labelledby="resume-director-title">
-        <div className="resume-section-header">
-          <SectionKicker index="08" label="AI Video Direction" />
-          <h2 id="resume-director-title">AI导演作品集</h2>
-          <p>
-            精选 3 个 AI 导演 / AIGC 漫剧作品，呈现内容理解、分镜设计、提示词优化、视频生成与剪辑交付能力。
-          </p>
-        </div>
-
-        <div className="resume-director-stage">
-          <div className="resume-director-intro">
-            <span>DIRECTOR WORKFLOW</span>
-            <h3>
-              <span>从创意到镜头</span>
-              <span>到 AI 视频交付</span>
-            </h3>
-            <p>
-              参与创意构思、分镜设计、提示词设计、画面生成、镜头衔接和后期剪辑，沉淀可复用的 AI 视频生产流程。
-            </p>
-          </div>
-
-          <div className="resume-director-grid">
-            {directorWorks.map((work, index) => (
-              <DirectorWorkCard work={work} index={index} onPlay={setActiveDirectorWork} key={work.title} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="resume-screen resume-tools" aria-labelledby="resume-tools-title">
-        <div className="resume-section-copy">
-          <SectionKicker index="09" label="Tools & Platform" />
-          <h2 id="resume-tools-title">工具能力</h2>
-          <p>
-            工具能力服务于业务运营自动化、内容生产、流程规范和批量化交付，不以全栈开发能力作为定位。
-          </p>
-        </div>
-        <div className="resume-tool-matrix">
-          {toolGroups.map((group) => (
-            <article className="resume-tool-group" key={group.title}>
-              <div>
-                <Cpu size={17} aria-hidden="true" />
-                <h3>{group.title}</h3>
+              <div className="resume-hero-actions resume-hero-actions--overlay">
+                <a className="resume-hero-btn resume-hero-btn--primary" href="#resume-project-archive">
+                  <PlayCircle size={14} aria-hidden="true" />
+                  查看项目
+                </a>
+                <button className="resume-hero-btn resume-hero-btn--ghost resume-hero-btn--contact" type="button" onClick={showContactPhone}>
+                  <Mail size={14} aria-hidden="true" />
+                  联系我
+                </button>
               </div>
-              <p>{group.subtitle}</p>
-              <div className="resume-tool-tags">
-                {group.tools.map((tool) => (
-                  <span key={tool}>{tool}</span>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="resume-screen resume-target" aria-labelledby="resume-target-title">
-        <div className="resume-section-header">
-          <SectionKicker index="10" label="Target Teams" />
-          <h2 id="resume-target-title">适配团队</h2>
-          <p>更适合内容生产、业务运营、AI 工具和工作流落地方向的团队，不以纯后端开发或算法模型训练为主要定位。</p>
-        </div>
-        <div className="resume-target-grid">
-          {targetIndustries.map((industry) => (
-            <div className="resume-target-card" key={industry}>
-              <Rocket size={18} aria-hidden="true" />
-              <span>{industry}</span>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="resume-screen resume-contact" aria-labelledby="resume-contact-title">
-        <div className="resume-contact-card">
-          <SectionKicker index="11" label="Get In Touch" />
-          <h2 id="resume-contact-title">联系方式</h2>
-          <p>如果团队需要业务运营自动化、AI 内容生产提效、AIGC 项目执行或 AI 工作流落地方向的候选人，可以通过联系方式联系。</p>
-
-          <div className="resume-contact-grid">
-            <InfoPill icon={Mail} label="邮箱" value="1425514532@qq.com" />
-            <InfoPill icon={MapPin} label="所在地" value="中国 · 杭州" />
-            <InfoPill icon={Clock} label="到岗时间" value="随时" />
           </div>
 
-          <div className="resume-contact-actions">
-            <button type="button" onClick={showContactPhone}>
-              <Mail size={16} aria-hidden="true" />
-              联系我
+          {/* 右侧精选案例 HUD 卡 */}
+          <TiltedCard
+            rotateAmplitude={12}
+            scaleOnHover={1.04}
+            captionText="▶ 立即查看 · CASE 01"
+            containerWidth="auto"
+            contentWidth="100%"
+            className="resume-hero-feature-tilt"
+          >
+            <aside className="resume-hero-feature" aria-label="精选案例">
+            <span className="resume-hero-feature-aura" aria-hidden="true" />
+            <span className="resume-hero-feature-rim" aria-hidden="true" />
+            <div className="resume-hero-feature-head">
+              <span className="resume-hero-feature-tag">精选案例</span>
+              <a href="#resume-project-archive" aria-label="进入项目档案">
+                →
+              </a>
+            </div>
+            <button
+              className="resume-hero-feature-preview"
+              type="button"
+              onClick={() => setActiveImagePreview(ecommerceScreenshots[0])}
+              aria-label={`查看 ${ecommerceScreenshots[0].title}`}
+            >
+              <img src={ecommerceScreenshots[0].src} alt={ecommerceScreenshots[0].title} />
+              <span className="resume-hero-feature-meta" aria-hidden="true">
+                <span>CASE · 01</span>
+                <span className="resume-hero-feature-meta-bar"><i style={{ width: "78%" }} /></span>
+              </span>
             </button>
-            <a href={profileOverviewHref}>
-              <ArrowLeft size={16} aria-hidden="true" />
-              返回总览
+            <strong>AI 驱动内容生产引擎</strong>
+            <p>生产 → 分发 → 复盘 → 优化</p>
+            <span className="resume-hero-feature-dots" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+            <a className="resume-hero-feature-go" href="#resume-project-archive">
+              立即查看
+              <span>→</span>
             </a>
+            </aside>
+          </TiltedCard>
+        </div>
+
+        <a className="resume-lock-scroll" href="#resume-core-stack" aria-label="继续向下浏览">
+          <span />
+        </a>
+      </section>
+
+      <section className="resume-system-sequence" aria-label="个人能力与项目档案">
+        <CoreCapabilityStack sharedBackdrop />
+
+        <ProjectArchiveSection onOpenProject={openProject} />
+      </section>
+
+      <section
+        ref={directorRef}
+        className={`resume-screen cap-stack-section is-in has-shared-backdrop resume-director${directorVisible ? " is-visible" : ""}`}
+        id="resume-director"
+        aria-labelledby="resume-director-title"
+      >
+        <span className="cap-stack-bg-grid" aria-hidden="true" />
+        <span className="cap-hud cap-hud-tl" aria-hidden="true" />
+        <span className="cap-hud cap-hud-tr" aria-hidden="true" />
+        <span className="cap-hud cap-hud-bl" aria-hidden="true" />
+        <span className="cap-hud cap-hud-br" aria-hidden="true" />
+        <div className="cap-stack-shell resume-director-shell">
+          <div className="resume-section-header">
+            <SectionKicker index="04" label="AI Video Direction" />
+            <h2 id="resume-director-title">AI导演作品集</h2>
+            <p>精选 3 个 AI 导演 / AIGC 漫剧作品，呈现从创意构思、分镜设计到画面生成与后期剪辑的完整能力。</p>
+            <div className="resume-director-inline-flow" aria-label="导演工作流">
+              <span>创意构思</span>
+              <span>分镜设计</span>
+              <span>提示词优化</span>
+              <span>画面生成</span>
+              <span>镜头衔接</span>
+              <span>后期剪辑</span>
+            </div>
+          </div>
+
+          <div className="resume-director-stage">
+            <div className="resume-director-grid">
+              {directorWorks.map((work, index) => (
+                <DirectorWorkCard work={work} index={index} onPlay={setActiveDirectorWork} key={work.title} />
+              ))}
+            </div>
+
+            <DirectorReel clips={directorReelClips} onPlay={setActiveDirectorWork} />
           </div>
         </div>
       </section>
+
+      <div className="resume-rear-area">
+        <span className="cap-stack-bg-grid" aria-hidden="true" />
+        <span className="cap-hud cap-hud-tl" aria-hidden="true" />
+        <span className="cap-hud cap-hud-tr" aria-hidden="true" />
+        <span className="cap-hud cap-hud-bl" aria-hidden="true" />
+        <span className="cap-hud cap-hud-br" aria-hidden="true" />
+
+        <RearScreen id="resume-delivery" className="resume-delivery">
+          <div className="resume-rear-module">
+            <div className="resume-section-header">
+              <SectionKicker index="05" label="DELIVERY & COLLABORATION" />
+              <h2 id="resume-delivery-title">交付与合作</h2>
+              <p>
+                从这里开始进入收尾区：说明我能独立交付的 AI 工作流、需要研发协作的边界，以及更适合合作的团队类型与联系方式。
+              </p>
+            </div>
+
+            <h3 className="resume-rear-module-title">交付边界与工具栈</h3>
+
+            <div className="resume-delivery-grid">
+              <article className="resume-delivery-card resume-boundary-card">
+                <span>DELIVERABLE</span>
+                <h3>我能独立完成</h3>
+                <ul className="resume-delivery-scope-list">
+                  {independentScopes.map((item) => (
+                    <li key={item}>
+                      <CheckCircle2 size={14} aria-hidden="true" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <article className="resume-delivery-card resume-boundary-card is-collaboration">
+                <span>COLLAB REQUIRED</span>
+                <h3>需要研发协作</h3>
+                <ul>
+                  {collaborationScopes.map((item) => (
+                    <li key={item}>
+                      <Rocket size={14} aria-hidden="true" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <aside className="resume-delivery-tools" aria-label="工具栈">
+                <span>TOOLS & PLATFORM</span>
+                <h3>工具栈</h3>
+                <div className="resume-delivery-tool-grid">
+                  {toolGroups.map((group) => (
+                    <article className="resume-delivery-tool-card" key={group.title}>
+                      <div>
+                        <Cpu size={15} aria-hidden="true" />
+                        <h4>{group.title}</h4>
+                      </div>
+                      <p>{group.tools.join(" · ")}</p>
+                    </article>
+                  ))}
+                </div>
+              </aside>
+            </div>
+          </div>
+        </RearScreen>
+
+        <RearScreen id="resume-team-fit" className="resume-team-fit">
+          <div className="resume-rear-module">
+            <div className="resume-section-header">
+              <SectionKicker index="06" label="TEAM FIT" />
+              <h2 id="resume-team-fit-title">适配团队</h2>
+              <p>
+                更适合需要 AI 工作流落地、内容生产提效、AIGC 项目执行和前沿工具验证的团队。
+              </p>
+              <div className="resume-director-inline-flow" aria-label="合作切入环节">
+                <span>需求沟通</span>
+                <span>场景拆解</span>
+                <span>原型验证</span>
+                <span>脚本执行</span>
+                <span>复盘沉淀</span>
+              </div>
+            </div>
+
+            <div className="resume-team-grid" aria-label="适配团队">
+              {teamFitItems.map((item, index) => (
+                <article className="resume-team-card" key={item.title}>
+                  <div>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <Briefcase size={16} aria-hidden="true" />
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </RearScreen>
+
+        <RearScreen id="resume-contact" className="resume-contact resume-contact-final">
+          <div className="resume-rear-module">
+            <div className="resume-section-header">
+              <SectionKicker index="07" label="CONTACT" />
+              <h2 id="resume-contact-title">联系方式</h2>
+              <p>
+                如果你正在把 AI 工具接入真实业务流程，我更适合从流程拆解、原型验证、脚本执行和复盘沉淀这些环节切入。
+              </p>
+              <div className="resume-director-inline-flow" aria-label="协作启动流程">
+                <span>邮件沟通</span>
+                <span>需求确认</span>
+                <span>原型 demo</span>
+                <span>协作启动</span>
+                <span>复盘沉淀</span>
+              </div>
+            </div>
+
+            <div className="resume-contact-final-layout resume-contact-final-layout--centered">
+              <div className="resume-contact-chips" aria-label="适合沟通方向">
+                <span>AI 工作流落地</span>
+                <span>AIGC 内容生产</span>
+                <span>电商视觉自动化</span>
+                <span>Agent 原型验证</span>
+                <span>FDE 前沿部署</span>
+              </div>
+
+              <div className="resume-contact-contact-row" aria-label="联系方式">
+                <article className="resume-contact-mini-card is-primary">
+                  <span>邮箱</span>
+                  <strong>1425514532@qq.com</strong>
+                  <p>适合直接发送岗位、合作或项目沟通。</p>
+                </article>
+                <article className="resume-contact-mini-card">
+                  <span>所在地</span>
+                  <strong>中国 · 杭州</strong>
+                  <p>方便线下沟通 AI、内容和自动化相关项目。</p>
+                </article>
+                <article className="resume-contact-mini-card">
+                  <span>到岗时间</span>
+                  <strong>随时</strong>
+                  <p>可以较快进入项目、原型和协作讨论。</p>
+                </article>
+                <a className="resume-contact-mini-card resume-contact-mini-card-action is-action" href="mailto:1425514532@qq.com">
+                  <span>联系我</span>
+                  <strong>立即发邮件</strong>
+                  <p>如果你想直接推进合作，点这里就行。</p>
+                </a>
+              </div>
+
+              <p className="resume-contact-closing-line">把工具接入流程，把流程变成可复用的系统。</p>
+            </div>
+          </div>
+        </RearScreen>
+      </div>
 
       <footer className="resume-footer">
-        <span>CANDIDATE PORTAL · LONG RESUME MODULE · v2.0.26</span>
+        <span>CANDIDATE PORTFOLIO · AI WORKFLOW CASE STUDIES</span>
       </footer>
       {activeDirectorWork && (
         <div
@@ -1394,29 +1464,6 @@ export default function ResumePage(): JSX.Element {
           </div>
         </div>
       )}
-      {activeAutomationDemo && (
-        <div
-          className="resume-video-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label={activeAutomationDemo.title}
-          onClick={() => setActiveAutomationDemo(null)}
-        >
-          <div className="resume-video-modal-panel" onClick={(event) => event.stopPropagation()}>
-            <div className="resume-video-modal-head">
-              <div>
-                <span>AI AUTOMATION PROOF</span>
-                <h3>{activeAutomationDemo.title}</h3>
-                <p>{activeAutomationDemo.description}</p>
-              </div>
-              <button type="button" onClick={() => setActiveAutomationDemo(null)} aria-label="关闭演示">
-                <X size={18} aria-hidden="true" />
-              </button>
-            </div>
-            <video className="resume-video-modal-player" src={activeAutomationDemo.videoHref} controls preload="metadata" />
-          </div>
-        </div>
-      )}
       {activeImagePreview && (
         <div
           className="resume-image-modal"
@@ -1440,27 +1487,9 @@ export default function ResumePage(): JSX.Element {
           </div>
         </div>
       )}
-      {activeProjectVideo && (
-        <div
-          className="resume-video-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label={activeProjectVideo.title}
-          onClick={() => setActiveProjectVideo(null)}
-        >
-          <div className="resume-video-modal-panel" onClick={(event) => event.stopPropagation()}>
-            <div className="resume-video-modal-head">
-              <div>
-                <span>PROJECT WORKFLOW DEMO</span>
-                <h3>{activeProjectVideo.title}</h3>
-                <p>{activeProjectVideo.description}</p>
-              </div>
-              <button type="button" onClick={() => setActiveProjectVideo(null)} aria-label="关闭演示视频">
-                <X size={18} aria-hidden="true" />
-              </button>
-            </div>
-            <video className="resume-video-modal-player" src={activeProjectVideo.videoHref} controls autoPlay preload="metadata" />
-          </div>
+      {activeProjectSlug && (
+        <div className="resume-project-overlay" role="dialog" aria-modal="true">
+          <ProjectCasePage slug={activeProjectSlug} onClose={closeProject} />
         </div>
       )}
     </main>

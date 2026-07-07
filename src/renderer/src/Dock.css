@@ -1,0 +1,129 @@
+.dock-outer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  max-width: 100%;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+.dock-panel {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: fit-content;
+  max-width: min(100%, calc(100vw - 40px));
+  gap: clamp(6px, 1.2vw, 12px);
+  padding: 6px 10px;
+  border: 1px solid rgba(21, 247, 255, 0.16);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(10, 18, 40, 0.68), rgba(4, 8, 24, 0.46)),
+    rgba(2, 6, 18, 0.46);
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dock-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding: 0 13px;
+  border: 1px solid rgba(232, 241, 255, 0.14);
+  border-radius: 999px;
+  color: rgba(232, 241, 255, 0.78);
+  background:
+    radial-gradient(circle at 45% 18%, rgba(21, 247, 255, 0.16), transparent 45%),
+    rgba(5, 12, 30, 0.72);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+  outline: none;
+  transform-origin: center bottom;
+  will-change: transform;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.dock-item::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: inherit;
+  border: 1px solid rgba(21, 247, 255, 0);
+  pointer-events: none;
+  transition: border-color 0.18s ease;
+}
+
+.dock-item:hover,
+.dock-item:focus-visible,
+.dock-item.is-active {
+  color: #e8f1ff;
+  border-color: rgba(21, 247, 255, 0.42);
+  background:
+    radial-gradient(circle at 45% 18%, rgba(21, 247, 255, 0.24), transparent 46%),
+    rgba(7, 18, 42, 0.82);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.3),
+    0 0 22px rgba(21, 247, 255, 0.13),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.dock-item:hover::after,
+.dock-item:focus-visible::after,
+.dock-item.is-active::after {
+  border-color: rgba(21, 247, 255, 0.18);
+}
+
+.dock-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .dock-panel {
+    gap: 7px;
+    padding: 5px 7px;
+    max-width: calc(100vw - 32px);
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+
+  .dock-panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dock-item {
+    padding-inline: 11px;
+  }
+
+  .dock-text {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock-item,
+  .dock-item::after {
+    transition: none;
+  }
+}

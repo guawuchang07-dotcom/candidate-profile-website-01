@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import avatarOrbAsset from "./assets/cyber/avatar-orb.png";
 import cityLeftAsset from "./assets/cyber/city-left.png";
 import cityRightAsset from "./assets/cyber/city-right.png";
@@ -64,9 +64,13 @@ const layoutMarkers = [
 ];
 
 const loadingLetters = "LOADING".split("");
-const accessingLetters = "ACCESSING".split("");
+const accessingLetters = "LAUNCH".split("");
 const loaderLeftArrows = [">", ">", ">"];
 const loaderRightArrows = ["<", "<", "<"];
+const audioWaveBars = Array.from({ length: 92 }, (_, index) => ({
+  height: `${18 + ((index * 11) % 58)}px`,
+  delay: `${index * -0.055}s`
+}));
 
 const profileAbilities = [
   {
@@ -94,11 +98,21 @@ const profileProjects: ProfileProject[] = [
     icon: "growth",
     title: "服装电商主图与宣传视频生成工作流",
     subtitle: "E-commerce AIGC Workflow · 降本提效主推项目",
-    description: "针对服装电商商拍成本高、上新素材准备重复的痛点，批量生成电商主图并延展为宣传视频，对标 AI 商拍降本提效场景。",
-    role: "业务痛点拆解、生成参数设计、批量出图流程、人工筛选反馈、图生视频链路验证",
-    value: "把电商视觉素材准备做成可配置、可批量、可复盘的半自动工作流，帮助运营快速测试主图风格和视频卖点",
-    tags: ["电商主图", "服装风格", "批量生成", "图生视频"],
+    description: "针对服装电商商拍成本高、上新素材准备重复的痛点，批量生成电商主图，并延展为宣传视频与 AI 形象短视频，对标 AI 商拍降本提效场景。",
+    role: "业务痛点拆解、生成参数设计、批量出图流程、人工筛选反馈、图生视频与动作迁移链路验证",
+    value: "把电商视觉素材准备做成可配置、可批量、可复盘的半自动工作流，帮助运营快速测试主图风格、视频卖点和虚拟模特展示效果",
+    tags: ["电商主图", "服装风格", "批量生成", "AI形象视频"],
     detailHref: "resume#resume-projects"
+  },
+  {
+    icon: "ai",
+    title: "AI 自媒体运营工作台",
+    subtitle: "Guga Content OS · 可恢复内容生产工作流",
+    description: "把长素材整理成主稿、多平台草稿、封面方案和本地发布包，并加入人工事实确认、发布前事实闸门、审计日志和回滚能力。",
+    role: "工作流设计、FastAPI/Vue 集成、artifact 版本治理、claim 审核、稳定 demo、provider smoke test 安全入口",
+    value: "让面试官不用看源码，也能看懂一个 AI 内容系统如何从输入、审稿、事实确认走到本地发布包，并清楚知道哪些能力尚未接真实平台。",
+    tags: ["LangGraph", "Artifact", "事实闸门", "审计回滚"],
+    detailHref: "projects/ai-content-ops"
   },
   {
     icon: "growth",
@@ -210,7 +224,44 @@ export default function CandidateSystemPage(): JSX.Element {
 
     setLoaderProgress(0);
     setScreenState("entering");
-    window.setTimeout(() => setScreenState("profile"), transitionDurationMs);
+    window.setTimeout(() => {
+      window.location.href = getAppRouteHref("resume");
+    }, transitionDurationMs);
+  }
+
+  function updateScenePointer(event: MouseEvent<HTMLElement>): void {
+    if (screenState === "profile") {
+      return;
+    }
+
+    const target = event.currentTarget;
+    const rect = target.getBoundingClientRect();
+    const relativeX = (event.clientX - rect.left) / rect.width - 0.5;
+    const relativeY = (event.clientY - rect.top) / rect.height - 0.5;
+
+    target.style.setProperty("--scene-tilt-x", `${(-relativeY * 5.2).toFixed(2)}deg`);
+    target.style.setProperty("--scene-tilt-y", `${(relativeX * 6.4).toFixed(2)}deg`);
+    target.style.setProperty("--scene-shift-x", `${(relativeX * 16).toFixed(2)}px`);
+    target.style.setProperty("--scene-shift-y", `${(relativeY * 12).toFixed(2)}px`);
+    target.style.setProperty("--avatar-eye-x", `${(relativeX * 14).toFixed(2)}px`);
+    target.style.setProperty("--avatar-eye-y", `${(relativeY * 10).toFixed(2)}px`);
+    target.style.setProperty("--avatar-glow-x", `${((relativeX + 0.5) * 100).toFixed(1)}%`);
+    target.style.setProperty("--avatar-glow-y", `${((relativeY + 0.5) * 100).toFixed(1)}%`);
+    target.style.setProperty("--wave-focus-x", `${((relativeX + 0.5) * 100).toFixed(1)}%`);
+  }
+
+  function resetScenePointer(event: MouseEvent<HTMLElement>): void {
+    const target = event.currentTarget;
+
+    target.style.setProperty("--scene-tilt-x", "0deg");
+    target.style.setProperty("--scene-tilt-y", "0deg");
+    target.style.setProperty("--scene-shift-x", "0px");
+    target.style.setProperty("--scene-shift-y", "0px");
+    target.style.setProperty("--avatar-eye-x", "0px");
+    target.style.setProperty("--avatar-eye-y", "0px");
+    target.style.setProperty("--avatar-glow-x", "50%");
+    target.style.setProperty("--avatar-glow-y", "46%");
+    target.style.setProperty("--wave-focus-x", "50%");
   }
 
   function returnToHome(): void {
@@ -259,11 +310,29 @@ export default function CandidateSystemPage(): JSX.Element {
       className={`candidate-page candidate-page-${screenState}${resumeTransitionActive ? " is-opening-resume" : ""}`}
       aria-label="Candidate system preview"
     >
-      <section className={`candidate-stage stage-${screenState}`} aria-label="Candidate system">
+      <section
+        className={`candidate-stage stage-${screenState}`}
+        aria-label="Candidate system"
+        onMouseMove={updateScenePointer}
+        onMouseLeave={resetScenePointer}
+      >
         <div className="stage-grid" aria-hidden="true" />
         <div className="pixel-atmosphere" aria-hidden="true">
           <div className="distant-city" />
           <img className="signal-wave-asset" src={signalWaveAsset} alt="" />
+          <div className="audio-wave-layer" aria-hidden="true">
+            {audioWaveBars.map((bar, index) => (
+              <span
+                key={`wave-${index}`}
+                style={
+                  {
+                    "--wave-height": bar.height,
+                    "--wave-delay": bar.delay
+                  } as CssVars
+                }
+              />
+            ))}
+          </div>
           <img className="city-asset city-asset-left" src={cityLeftAsset} alt="" />
           <img className="city-asset city-asset-right" src={cityRightAsset} alt="" />
           <div className="pixel-spark-layer">
@@ -334,11 +403,27 @@ export default function CandidateSystemPage(): JSX.Element {
             <button
               className={`avatar-hit-area${screenState === "entering" ? " is-activating" : ""}`}
               type="button"
-              aria-label="点击头像查看候选人资料"
+              aria-label="点击头像启动个人作品集"
               disabled={screenState !== "home"}
               onClick={openCandidateProfile}
             >
               <img className="avatar-orb-asset" src={avatarOrbAsset} alt="" />
+              <span className="avatar-persona" aria-hidden="true">
+                <span className="avatar-persona-hair" />
+                <span className="avatar-persona-face">
+                  <span className="avatar-persona-eye avatar-persona-eye-left">
+                    <span />
+                  </span>
+                  <span className="avatar-persona-eye avatar-persona-eye-right">
+                    <span />
+                  </span>
+                </span>
+                <span className="avatar-persona-body" />
+              </span>
+              <span className="avatar-gaze" aria-hidden="true">
+                <span className="avatar-eye avatar-eye-left" />
+                <span className="avatar-eye avatar-eye-right" />
+              </span>
               <span className="avatar-data-field" aria-hidden="true">
                 {avatarDataNodes.map(([left, top, tone, delay], index) => (
                   <span
@@ -360,14 +445,14 @@ export default function CandidateSystemPage(): JSX.Element {
             <aside className="dialog-placeholder" aria-label="Avatar prompt">
               <img className="dialog-frame-asset" src={dialogFrameAsset} alt="" aria-hidden="true" />
               <div className="dialog-content">
-                <strong>点击头像查看候选人资料</strong>
-                <span>Click the avatar to view candidate profile.</span>
+                <strong>点击头像启动作品集</strong>
+                <span>Click the avatar to enter portfolio lockscreen.</span>
               </div>
             </aside>
 
             <div
               className={`loader-placeholder${screenState === "entering" ? " is-activating" : ""}`}
-              aria-label={screenState === "entering" ? "Loading candidate profile" : "Loading preview"}
+              aria-label={screenState === "entering" ? "Launching portfolio" : "Loading preview"}
             >
               <img className="loader-frame-asset" src={loaderFrameAsset} alt="" aria-hidden="true" />
               <div className="loader-status-row" aria-hidden="true">
@@ -427,6 +512,13 @@ export default function CandidateSystemPage(): JSX.Element {
               <span>/</span>
               <span>AI Implementation</span>
             </footer>
+
+            <div className="pixel-battle-scene" aria-hidden="true">
+              <span className="pixel-fighter pixel-fighter-ai" />
+              <span className="pixel-battle-slash" />
+              <span className="pixel-fighter pixel-fighter-task" />
+              <strong>AI AGENT VS REPEAT WORK</strong>
+            </div>
           </div>
         ) : (
           <section className="profile-screen profile-archive-screen" aria-label="Candidate profile">
@@ -457,7 +549,7 @@ export default function CandidateSystemPage(): JSX.Element {
                     <img src={avatarOrbAsset} alt="" />
                   </div>
                   <div className="profile-archive-name">张远博</div>
-                  <div className="profile-archive-role">AI工作流落地 / 业务自动化</div>
+                  <div className="profile-archive-role">AI工作流落地 / FDE前沿部署</div>
                   <div className="profile-archive-meta">
                     <span className="profile-meta-item profile-meta-location">中国 · 杭州</span>
                     <span className="profile-meta-item profile-meta-mail">1425514532@qq.com</span>
