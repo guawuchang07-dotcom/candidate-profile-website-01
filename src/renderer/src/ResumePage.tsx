@@ -1,45 +1,42 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import {
-  Bot,
   Briefcase,
   CheckCircle2,
+  ChevronDown,
   Cpu,
-  Image as ImageIcon,
   Mail,
-  MapPin,
   PlayCircle,
   Rocket,
-  Workflow,
   X
 } from "lucide-react";
-import avatarOrbAsset from "./assets/cyber/avatar-orb.png";
-import candidateAvatarAsset from "./assets/generated/portfolio/candidate-avatar.png";
-import heroLockBgAsset from "./assets/generated/portfolio/hero-lock-bg.png";
-import heroLockVideoAsset from "./assets/static/media/hero/hero-lockscreen-bg.mp4";
+import heroCharacterMp4Asset from "./assets/static/media/hero/hero-character-loop-u2net-v2.mp4";
+import heroCharacterWebmAsset from "./assets/static/media/hero/hero-character-loop-u2net-v2.webm";
+import heroCharacterPosterAsset from "./assets/static/media/hero/hero-character-poster-u2net-v2.png";
+import heroReferenceStageAsset from "./assets/static/media/hero/hero-reference-stage-v1.jpg";
 import idBadgeAsset from "./assets/static/media/hero/id-badge.png";
+import projectArchiveCharacterMp4Asset from "./assets/static/media/hero/project-archive-character-loop-person.mp4";
+import projectArchiveCharacterPosterAsset from "./assets/static/media/hero/project-archive-character-poster-person.png";
+import projectArchiveCharacterWebmAsset from "./assets/static/media/hero/project-archive-character-loop-person.webm";
 import section2CityBgAsset from "./assets/static/media/section2-city-bg.png";
+import CardSwap from "./CardSwap";
 import CoreCapabilityStack from "./CoreCapabilityStack";
 import Dock from "./Dock";
-import PixelTrail from "./PixelTrail";
+import ParticleReveal from "./ParticleReveal";
 import Section2Ambient from "./Section2Ambient";
-// @ts-expect-error -- TiltedCard is copied in as a plain JSX module.
-import TiltedCard from "./TiltedCard";
 import ProjectCasePage, { hasProjectCase } from "./ProjectCasePage";
 import "./resume-page.css";
 import "./core-capability-stack.css";
-import "./pixel-trail.css";
 
 type CssVars = CSSProperties & Record<`--${string}`, string>;
 
-const contactPhone = "17564138094";
 type ResumeNavItem = {
   label: string;
   href: string;
 };
 
 const resumeNavItems: ResumeNavItem[] = [
-  { label: "首页", href: "#resume-hero" },
+  { label: "首页", href: "#home" },
   { label: "能力栈", href: "#resume-core-stack" },
   { label: "项目档案", href: "#resume-project-archive" },
   { label: "作品", href: "#resume-director" },
@@ -68,6 +65,7 @@ const ecommerceScreenshots: ImagePreview[] = [
 function getAppRouteHref(route = ""): string {
   const basePath = window.location.pathname
     .replace(/\/(?:resume|profile)\/?$/, "/")
+    .replace(/\/projects\/[^/]+\/?$/, "/")
     .replace(/\/index\.html$/, "/");
   const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
   return `${normalizedBase}${route}`;
@@ -88,9 +86,10 @@ type DirectorWork = {
   duration: string;
   videoSrc: string;
   posterSrc: string;
+  format: "landscape" | "portrait";
 };
 
-type DirectorReelClip = Pick<DirectorWork, "title" | "duration" | "videoSrc" | "posterSrc">;
+type DirectorReelClip = Pick<DirectorWork, "title" | "duration" | "videoSrc" | "posterSrc" | "format">;
 
 type ImagePreview = {
   title: string;
@@ -103,69 +102,91 @@ type ImagePreview = {
 const archiveProjects = [
   {
     index: "01",
-    detailSlug: "ai-content-ops",
-    title: "AI 自媒体运营工作台",
-    label: "AI Content Ops Workbench",
-    summary: "从一个选题出发，结合私有资料库、Obsidian、历史成文和联网搜索，生成可审核的多平台内容包。",
-    problem: "自媒体创作者多平台发文时，需要反复查资料、改写、排版、复用历史内容和做发布前检查。",
-    flow: "选题输入→私有资料检索→联网搜索证据→多平台草稿→发布前审核包→Obsidian / 历史沉淀。",
-    proof: "创作台、私有资料库、Obsidian 同步、历史记录、发布中心和审核包已形成可演示流程。",
-    tags: ["Vue", "FastAPI", "Obsidian", "Research Bundle"]
+    detailSlug: "data-platform",
+    title: "AI 数据中台（含微信数据接入）",
+    label: "B2 / PLATFORM PROJECT",
+    summary: "以微信原始库为入口，经过 ETL、脱敏、对话块清洗和人工审核，向多个 AI 应用统一供给数据资产。",
+    problem: "原始聊天、业务资料和项目结果分散在不同位置，未经治理就进入 RAG 会带来噪声、隐私和版本问题。",
+    flow: "SQLite 只读→ETL 暂存→DataFilter 脱敏→人工审核→RAG / 考核 / 微调。",
+    proof: "微信数据导入是 B2 的接入子项目；数据中台负责统一治理、分流和状态追踪。",
+    tags: ["B2", "ETL / DataFilter", "RAG 底座"]
   },
   {
     index: "02",
     detailSlug: "ecommerce-aigc-workflow",
-    title: "服装电商主图 / 宣传视频生成工作流",
-    label: "E-commerce AIGC Workflow",
-    summary: "从服装参考图、平台规格、风格选择到主图候选、人工复核、视频延展。",
-    problem: "服装电商主图 / 宣传视频需要同时处理服装参考图、平台规格和风格选择。",
-    flow: "服装参考图→平台规格→风格选择→主图候选→人工复核→视频延展。",
-    proof: "工作流配置、批量主图、图生视频和完整演示均已归档为可查看证据。",
-    tags: ["主推项目", "电商视觉", "批量生成"]
+    title: "服装平台视觉生图自动化",
+    label: "INDEPENDENT PROJECT / LOCAL WORKFLOW",
+    summary: "把服装参考图、平台规格、风格设定、批量主图和图生视频串成可复用的 SKU 视觉生产链路。",
+    problem: "同一件服装要适配不同平台和内容形态，传统设计、修图和视频制作链路割裂且返工难追踪。",
+    flow: "参考图→平台规格→风格设定→批量生成→人工复核→视频延展。",
+    proof: "本地工作流原型，已验证输入配置、生成调度、人工复核和素材输出边界。",
+    tags: ["独立项目", "SKU 视觉", "批量生成"]
   },
   {
     index: "03",
-    detailSlug: "aigc-console",
-    title: "AI 漫剧 / 视频生产控制台",
-    label: "AIGC Production Console",
-    summary: "把小说分析、资产确认、提示词、视频任务与失败复盘整理成本地控制台。",
-    problem: "AI 漫剧 / 视频生产需要把小说分析、资产确认、提示词、视频任务与失败复盘集中管理。",
-    flow: "小说分析→资产确认→提示词→视频任务→失败复盘→本地控制台。",
-    proof: "控制台截图、Dify 资产分析和任务质检截图已作为项目证据归档。",
-    tags: ["AIGC", "控制台", "任务复盘"]
+    detailSlug: "ai-content-ops",
+    title: "自媒体智能内容运营 Agent",
+    label: "B4 / BUSINESS APPLICATION",
+    summary: "用 LangGraph 编排选题、写作、配图/视频、审核和多平台输出，并记录状态与模型成本。",
+    problem: "内容生产需要反复查资料、改写、排版和检查来源，单次产出难以回滚，历史内容也难复用。",
+    flow: "选题输入→SubGraph→Checkpointer→动态路由→多平台草稿→人工审核。",
+    proof: "包含自媒体运营自动化验证，但不包装成全自动发布系统；发布前仍保留人工确认。",
+    tags: ["B4", "LangGraph", "成本追踪"]
   },
   {
     index: "04",
-    detailSlug: "automation-scripts",
-    title: "自媒体运营自动化脚本集",
-    label: "Ops Automation Scripts",
-    summary: "把重复网页动作拆成规则、执行状态和人工确认节点，服务运营提效。",
-    problem: "自媒体运营里存在重复网页动作，需要拆成规则、执行状态和人工确认节点。",
-    flow: "重复网页动作→规则拆解→执行状态→人工确认节点→运营流程。",
-    proof: "本地脚本演示视频已归档；敏感动作保留人工确认，不做全自动发布。",
-    tags: ["浏览器自动化", "运营提效", "脚本"]
+    detailSlug: "live-clip-agent",
+    title: "AI 直播切片 Agent",
+    label: "B3 / CONTENT AUTOMATION",
+    summary: "把直播回放从 ASR 文本分析到高光裁切和数据回写，变成可持续复用的内容生产链路。",
+    problem: "长直播包含大量无效内容，人工找高光、记时间点和裁切片段耗时，结果也难回写到素材体系。",
+    flow: "浏览器提取音频→ASR 分块→LLM 高光分析→精准裁切→SSE 进度→数据回写。",
+    proof: "核心证据是 FFmpeg.wasm、任务表、SSE 进度和片段回写链路，不等同于普通剪辑工具。",
+    tags: ["B3", "ASR 高光", "FFmpeg.wasm"]
   },
   {
     index: "05",
-    detailSlug: "knowledge-base",
-    title: "个人知识沉淀 / AI 知识库系统",
-    label: "Knowledge Workflow",
-    summary: "用 Hermes 与 Obsidian 把对话、复盘、项目经验和待办沉淀成知识资产。",
-    problem: "对话、复盘、项目经验和待办需要沉淀成知识资产。",
-    flow: "Hermes 与 Obsidian→对话整理→复盘整理→项目经验 / 待办沉淀→知识资产。",
-    proof: "Obsidian 关系图谱与知识沉淀流程已作为可查看证据归档。",
-    tags: ["Hermes", "Obsidian", "知识库"]
+    detailSlug: "ai-voice-customer-service",
+    title: "AI 实时语音智能客服",
+    label: "B1 / FRONT-END PRODUCT",
+    summary: "面向私域电商场景，把实时语音、多模态回复和 RAG 检索组织成可交互的客服前台。",
+    problem: "客服需要同时理解商品、上下文、用户意图和图片/视频素材，普通问答链路难以稳定支撑多轮沟通。",
+    flow: "混合检索→意图识别→Query 改写→Rerank→语音 / 图文回复。",
+    proof: "验证目标：TTFT 压到 2 秒内，并在高丢包场景保持语音稳定；真实指标需继续压测。",
+    tags: ["B1", "实时语音", "多模态客服"]
   },
   {
     index: "06",
-    detailSlug: "boss-job-collector",
-    title: "BOSS 岗位收藏脚本",
-    label: "BOSS Job Collector",
-    summary: "把岗位搜索、条件过滤、信息提取、本地记录和人工筛选串成可复盘流程。",
-    problem: "求职筛选需要反复打开岗位、比对条件和记录状态，人工整理容易遗漏。",
-    flow: "岗位搜索→条件过滤→信息提取→本地记录→人工筛选→复盘优化。",
-    proof: "本地脚本演示视频与岗位信息记录流程；不包含自动沟通、批量投递或账号托管。",
-    tags: ["浏览器自动化", "求职流程", "人工筛选"]
+    detailSlug: "asset-center-sales-assessment",
+    title: "AI 素材中心 & 销售考核",
+    label: "B6 / BUSINESS MODULES",
+    summary: "同一套多模态素材和业务知识底座，同时支持精准素材检索与 AI 销售考核。",
+    problem: "图片、文字、视频和销售知识分散，素材难以检索，考核出题和评分也缺少统一上下文。",
+    flow: "OCR / VLM / ASR 增强→pgvector 检索→RAG 出题→LLM 评判→结果沉淀。",
+    proof: "素材中心和销售考核是 B6 的两个业务模块，共享数据、向量和知识结构。",
+    tags: ["B6", "多模态检索", "自动考核"]
+  },
+  {
+    index: "07",
+    detailSlug: "mcp-agent-cluster",
+    title: "MCP 多 Agent 共享服务集群",
+    label: "B5 / ARCHITECTURE VALIDATION",
+    summary: "通过 MCP 网关统一模型、RAG、记忆和 Prompt 服务，让多个项目共享能力并保持项目隔离。",
+    problem: "不同项目各自接模型、知识库和提示词，接口、权限、配额和上下文管理容易重复建设。",
+    flow: "REST→MCP 网关→LLM / RAG / Memory / Prompt 服务→项目路由。",
+    proof: "这是协议与架构验证，不包装成已经上线的 SaaS 产品；重点是复用和治理边界。",
+    tags: ["B5", "Streamable HTTP", "项目隔离"]
+  },
+  {
+    index: "08",
+    detailSlug: "model-finetune",
+    title: "聊天数据模型微调实验",
+    label: "B7 / LOCAL FINETUNE EXPLORATION",
+    summary: "从数据中台脱敏数据出发，验证 SFT、DPO、QLoRA 和 LoRA 对客服风格与回答偏好的改善。",
+    problem: "微调需要高质量偏好数据和明确评测边界，不能把大量商品知识直接塞进模型替代 RAG。",
+    flow: "脱敏清洗→ShareGPT / JSONL→SFT / DPO→QLoRA / LoRA→双盲评测。",
+    proof: "属于本地部署与技术探索，业务知识仍由 RAG 提供，不宣称已经形成生产模型服务。",
+    tags: ["B7", "SFT / DPO", "本地 QLoRA"]
   }
 ];
 
@@ -220,58 +241,85 @@ const teamFitItems = [
 
 const directorWorks: DirectorWork[] = [
   {
-    title: "核动力马",
-    type: "AIGC Comic Drama",
-    description: "负责视觉设定、镜头节奏和提示词迭代，完成具有强世界观包装的 AI 漫剧片段。",
-    role: ["创意设定", "分镜设计", "镜头提示词", "剪辑节奏"],
-    tools: ["ChatGPT", "Claude", "即梦", "Seedance", "剪映"],
-    status: "精选片段预览",
-    duration: "精选 00:24",
-    videoSrc: new URL("./assets/static/media/director/nuclear-horse.mp4", import.meta.url).href,
-    posterSrc: new URL("./assets/static/media/director/nuclear-horse.jpg", import.meta.url).href
+    title: "文定乾坤",
+    type: "横屏叙事 · AI 影像",
+    description: "横屏叙事样片，重点展示画面设定、氛围控制与镜头节奏的统一。",
+    role: ["画面设定", "分镜统筹", "镜头一致性", "节奏剪辑"],
+    tools: ["AI 生图", "AI 视频", "剪映"],
+    status: "完整样片已归档",
+    duration: "预览 00:24",
+    videoSrc: new URL("./assets/static/media/director/portfolio/heaven-order.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/heaven-order.jpg", import.meta.url).href,
+    format: "landscape"
   },
   {
-    title: "圣子归来",
-    type: "AI Narrative Video",
-    description: "围绕人物登场、剧情冲突和氛围镜头组织片段，提升叙事连贯性和短剧观看节奏。",
-    role: ["剧情拆解", "分镜脚本", "生图 / 生视频", "镜头衔接"],
-    tools: ["Claude", "即梦", "Seedance", "CapCut"],
-    status: "精选片段预览",
-    duration: "精选 00:23",
-    videoSrc: new URL("./assets/static/media/director/saint-returns.mp4", import.meta.url).href,
-    posterSrc: new URL("./assets/static/media/director/saint-returns.jpg", import.meta.url).href
+    title: "博物馆",
+    type: "现代叙事 · AI 影像",
+    description: "现代场景叙事样片，重点展示人物近景、对白节奏与连续镜头的叙事表达。",
+    role: ["剧情拆解", "人物表演", "镜头衔接", "成片统筹"],
+    tools: ["AI 生图", "AI 视频", "剪映"],
+    status: "完整样片已归档",
+    duration: "预览 00:24",
+    videoSrc: new URL("./assets/static/media/director/portfolio/museum.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/museum.jpg", import.meta.url).href,
+    format: "landscape"
   },
   {
-    title: "真人demo",
-    type: "AI Live-action Demo",
-    description: "以真人影像质感为目标，测试 AI 视频的镜头调度、画面筛选和后期包装流程。",
-    role: ["风格设定", "提示词优化", "画面筛选", "后期包装"],
-    tools: ["ChatGPT", "Seedance", "剪映"],
-    status: "精选片段预览",
-    duration: "精选 00:19",
-    videoSrc: new URL("./assets/static/media/director/live-action-demo.mp4", import.meta.url).href,
-    posterSrc: new URL("./assets/static/media/director/live-action-demo.jpg", import.meta.url).href
+    title: "女总裁捡漏",
+    type: "竖屏短剧 · AI 影像",
+    description: "竖屏短剧样片，重点展示移动端构图、人物情绪和冲突节奏的控制。",
+    role: ["短剧节奏", "人物一致性", "竖屏构图", "后期包装"],
+    tools: ["AI 生图", "AI 视频", "剪映"],
+    status: "完整样片已归档",
+    duration: "预览 00:24",
+    videoSrc: new URL("./assets/static/media/director/portfolio/ceo-discovery.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/ceo-discovery.jpg", import.meta.url).href,
+    format: "portrait"
   }
 ];
 
 const directorReelClips: DirectorReelClip[] = [
   {
-    title: "AI 影像片段 01",
-    duration: "00:25",
-    videoSrc: new URL("./assets/static/media/director/reel/director-reel-01.mp4", import.meta.url).href,
-    posterSrc: new URL("./assets/static/media/director/reel/director-reel-01.jpg", import.meta.url).href
-  },
-  {
-    title: "AI 影像片段 02",
+    title: "苟道长生",
     duration: "00:24",
-    videoSrc: new URL("./assets/static/media/director/reel/director-reel-02.mp4", import.meta.url).href,
-    posterSrc: new URL("./assets/static/media/director/reel/director-reel-02.jpg", import.meta.url).href
+    videoSrc: new URL("./assets/static/media/director/portfolio/immortal-path.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/immortal-path.jpg", import.meta.url).href,
+    format: "landscape"
   },
   {
-    title: "AI 影像片段 03",
-    duration: "00:21",
-    videoSrc: new URL("./assets/static/media/director/reel/director-reel-03.mp4", import.meta.url).href,
-    posterSrc: new URL("./assets/static/media/director/reel/director-reel-03.jpg", import.meta.url).href
+    title: "财阀太子爷",
+    duration: "00:24",
+    videoSrc: new URL("./assets/static/media/director/portfolio/tycoon-prince.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/tycoon-prince.jpg", import.meta.url).href,
+    format: "landscape"
+  },
+  {
+    title: "冒牌货",
+    duration: "00:24",
+    videoSrc: new URL("./assets/static/media/director/portfolio/impostor.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/impostor.jpg", import.meta.url).href,
+    format: "landscape"
+  },
+  {
+    title: "深圳",
+    duration: "00:24",
+    videoSrc: new URL("./assets/static/media/director/portfolio/shenzhen.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/shenzhen.jpg", import.meta.url).href,
+    format: "portrait"
+  },
+  {
+    title: "渔女",
+    duration: "00:24",
+    videoSrc: new URL("./assets/static/media/director/portfolio/fisher-girl.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/fisher-girl.jpg", import.meta.url).href,
+    format: "portrait"
+  },
+  {
+    title: "作精",
+    duration: "00:24",
+    videoSrc: new URL("./assets/static/media/director/portfolio/spoiled-girl.mp4", import.meta.url).href,
+    posterSrc: new URL("./assets/static/media/director/portfolio/spoiled-girl.jpg", import.meta.url).href,
+    format: "portrait"
   }
 ];
 
@@ -475,6 +523,20 @@ function ProjectArchiveSection({ onOpenProject }: { onOpenProject: (slug: string
         <span className="resume-project-archive-node resume-project-archive-node--5" />
       </div>
       <div className="resume-project-archive-shade" aria-hidden="true" />
+      <div className="resume-project-archive-character" aria-hidden="true">
+        <video
+          className="resume-project-archive-character-video"
+          poster={projectArchiveCharacterPosterAsset}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+        >
+          <source src={projectArchiveCharacterWebmAsset} type="video/webm" />
+          <source src={projectArchiveCharacterMp4Asset} type="video/mp4" />
+        </video>
+      </div>
       <div className="resume-project-archive-frame" aria-hidden="true">
         <span />
         <span />
@@ -493,7 +555,7 @@ function ProjectArchiveSection({ onOpenProject }: { onOpenProject: (slug: string
           <strong>PROJECT EXPERIENCE</strong>
         </div>
         <h2 id="resume-project-archive-title">项目交付档案</h2>
-        <p>{"\u9009\u62e9\u4e00\u4e2a\u9879\u76ee\u6863\u6848\uff0c\u67e5\u770b\u4e1a\u52a1\u95ee\u9898\u3001\u5de5\u4f5c\u6d41\u52a8\u4f5c\u3001\u53ef\u5c55\u793a\u8bc1\u636e\u4e0e\u4ea4\u4ed8\u8fb9\u754c\u3002"}</p>
+        <p>聚焦 AI 应用开发与 FDE 交付，把数据、模型和工具接入真实业务，做成可运行、可验证的工作流程。</p>
       </div>
 
       <div className="resume-project-archive-card-deck" aria-label="\u9879\u76ee\u6863\u6848\u5361">
@@ -510,7 +572,7 @@ function ProjectArchiveSection({ onOpenProject }: { onOpenProject: (slug: string
               href={detailHref}
               key={project.title}
               style={cardStyle(off)}
-              aria-label={isCenter ? `??${project.title}` : `???${project.title}`}
+              aria-label={isCenter ? `查看项目：${project.title}` : `切换到项目：${project.title}`}
               aria-hidden={Math.abs(off) > 2}
               tabIndex={isCenter ? 0 : -1}
               onClick={(e) => {
@@ -623,11 +685,11 @@ function DirectorReel({
   const openClip = (clip: DirectorReelClip): void => {
     onPlay({
       ...clip,
-      type: "AI Reel Reserve",
-      description: "第 4 屏横向循环作品储备片段，用于快速查看更多 AI 影像输出。",
+      type: clip.format === "portrait" ? "AI 漫剧 · 竖屏样片" : "AI 漫剧 · 横屏样片",
+      description: "AI 漫剧导演作品库样片，点击后查看经过网页优化的 24 秒预览。",
       role: [],
       tools: [],
-      status: "循环片段预览"
+      status: "完整样片已归档"
     });
   };
 
@@ -640,7 +702,7 @@ function DirectorReel({
             aria-hidden={groupIndex === 1 ? true : undefined}
             key={"director-reel-sequence-" + groupIndex}
           >
-            {clips.map((clip, clipIndex) => (
+            {clips.map((clip) => (
               <button
                 className="resume-director-reel-item"
                 type="button"
@@ -649,18 +711,18 @@ function DirectorReel({
                 aria-label={"播放 " + clip.title}
                 key={groupIndex + "-" + clip.title}
               >
-                <video
+                <img
                   className="resume-director-reel-video"
-                  src={clip.videoSrc}
-                  poster={clip.posterSrc}
-                  muted
-                  autoPlay
-                  loop
-                  playsInline
-                  preload="metadata"
+                  src={clip.posterSrc}
+                  alt=""
+                  loading="eager"
+                  decoding="async"
                 />
+                <span className="resume-director-reel-play" aria-hidden="true">
+                  <PlayCircle size={22} />
+                </span>
                 <span className="resume-director-reel-meta" aria-hidden="true">
-                  <span>{"R0" + (clipIndex + 1)}</span>
+                  <span>{clip.title}</span>
                   <strong>{clip.duration}</strong>
                 </span>
               </button>
@@ -739,13 +801,16 @@ function RearScreen({
 }
 
 export default function ResumePage(): JSX.Element {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [infoVisible, setInfoVisible] = useState(false);
+  const [heroVideoReady, setHeroVideoReady] = useState(false);
+  const [heroParticleDone, setHeroParticleDone] = useState(false);
+  const [heroVideoFailed, setHeroVideoFailed] = useState(false);
   const [activeDirectorWork, setActiveDirectorWork] = useState<DirectorWork | null>(null);
   const [activeImagePreview, setActiveImagePreview] = useState<ImagePreview | null>(null);
   const [activeProjectSlug, setActiveProjectSlug] = useState<string | null>(null);
-  const [activeNavHref, setActiveNavHref] = useState("#resume-hero");
-  const heroRef = useRef<HTMLElement | null>(null);
-  const heroPanelRef = useRef<HTMLDivElement | null>(null);
+  const [activeNavHref, setActiveNavHref] = useState("#home");
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
+  const infoTriggeredRef = useRef(false);
   const [directorRef, directorVisible] = useRevealOnce<HTMLElement>({
     threshold: 0.24,
     rootMargin: "0px 0px -14% 0px",
@@ -789,7 +854,7 @@ export default function ResumePage(): JSX.Element {
 
   useEffect(() => {
     const syncNavHash = (): void => {
-      const nextHash = window.location.hash || "#resume-hero";
+      const nextHash = window.location.hash || "#home";
       if (resumeNavItems.some((item) => item.href === nextHash)) {
         setActiveNavHref(nextHash);
       }
@@ -800,169 +865,24 @@ export default function ResumePage(): JSX.Element {
     return () => window.removeEventListener("hashchange", syncNavHash);
   }, []);
 
-  useEffect(() => {
-    let secondFrame: number | null = null;
-    const firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        setIsLoaded(true);
-      });
-    });
+  function handleHeroTimeUpdate(): void {
+    const video = heroVideoRef.current;
+    // The current loop begins its pointing gesture just before 4s; reveal the UI on that cue.
+    if (!video || infoTriggeredRef.current || video.currentTime < 3.65) return;
+    infoTriggeredRef.current = true;
+    setInfoVisible(true);
+  }
 
-    return () => {
-      window.cancelAnimationFrame(firstFrame);
-      if (secondFrame !== null) {
-        window.cancelAnimationFrame(secondFrame);
-      }
-    };
-  }, []);
+  function handleHeroMediaError(): void {
+    infoTriggeredRef.current = true;
+    setHeroVideoFailed(true);
+    setHeroVideoReady(false);
+    setHeroParticleDone(true);
+    setInfoVisible(true);
+  }
 
-  // Hero 桌面端鼠标视差:pointermove 记录目标值,rAF lerp 平滑,写入 CSS variables
-  // - 移动端(<=767px)与 prefers-reduced-motion: reduce 都早退,不绑事件、不起 rAF
-  // - 鼠标离开 → 平滑归零
-  useEffect(() => {
-    const node = heroRef.current;
-    if (!node) return;
-
-    // 早退:粗指针 / 窄屏 / 减少动效
-    const mqlReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const mqlNarrow = window.matchMedia("(max-width: 767px)");
-    const mqlCoarse = window.matchMedia("(pointer: coarse)");
-    if (mqlReduce.matches || mqlNarrow.matches || mqlCoarse.matches) {
-      node.style.setProperty("--hero-mx", "0");
-      node.style.setProperty("--hero-my", "0");
-      node.style.setProperty("--hero-tilt-x", "0deg");
-      node.style.setProperty("--hero-tilt-y", "0deg");
-      node.style.setProperty("--hero-pan-x", "0px");
-      node.style.setProperty("--hero-pan-y", "0px");
-      node.style.setProperty("--hero-panel-tilt-x", "0deg");
-      node.style.setProperty("--hero-panel-tilt-y", "0deg");
-      node.style.setProperty("--hero-panel-shift-x", "0px");
-      node.style.setProperty("--hero-panel-shift-y", "0px");
-      heroPanelRef.current?.style.setProperty("--hero-panel-tilt-x", "0deg");
-      heroPanelRef.current?.style.setProperty("--hero-panel-tilt-y", "0deg");
-      heroPanelRef.current?.style.setProperty("--hero-panel-shift-x", "0px");
-      heroPanelRef.current?.style.setProperty("--hero-panel-shift-y", "0px");
-      return;
-    }
-
-    // 目标 (-1, 1),当前 (-1, 1) — 用 lerp 缓慢追
-    let targetX = 0;
-    let targetY = 0;
-    let currentX = 0;
-    let currentY = 0;
-    const lerp = 0.08;
-    const epsilon = 0.001;
-    let raf: number | null = null;
-    let stillFrames = 0;
-
-    const writeVars = (): void => {
-      // 全局位移强度因子,所有具体动画在 CSS 里再乘自己的最大幅度
-      node.style.setProperty("--hero-mx", currentX.toFixed(4));
-      node.style.setProperty("--hero-my", currentY.toFixed(4));
-      // 给 CSS 现成的角度/像素值,避免 calc 链太长
-      node.style.setProperty("--hero-tilt-x", `${(currentY * -2.5).toFixed(3)}deg`);
-      node.style.setProperty("--hero-tilt-y", `${(currentX * 2.5).toFixed(3)}deg`);
-      node.style.setProperty("--hero-pan-x", `${(currentX * 12).toFixed(2)}px`);
-      node.style.setProperty("--hero-pan-y", `${(currentY * 12).toFixed(2)}px`);
-      const panelTiltX = `${(currentY * -5.2).toFixed(3)}deg`;
-      const panelTiltY = `${(currentX * 5.2).toFixed(3)}deg`;
-      const panelShiftX = `${(currentX * 8).toFixed(2)}px`;
-      const panelShiftY = `${(currentY * 5).toFixed(2)}px`;
-      node.style.setProperty("--hero-panel-tilt-x", panelTiltX);
-      node.style.setProperty("--hero-panel-tilt-y", panelTiltY);
-      node.style.setProperty("--hero-panel-shift-x", panelShiftX);
-      node.style.setProperty("--hero-panel-shift-y", panelShiftY);
-      const panelNode = heroPanelRef.current;
-      if (panelNode) {
-        panelNode.style.setProperty("--hero-panel-tilt-x", panelTiltX);
-        panelNode.style.setProperty("--hero-panel-tilt-y", panelTiltY);
-        panelNode.style.setProperty("--hero-panel-shift-x", panelShiftX);
-        panelNode.style.setProperty("--hero-panel-shift-y", panelShiftY);
-      }
-    };
-
-    const tick = (): void => {
-      const dx = targetX - currentX;
-      const dy = targetY - currentY;
-      currentX += dx * lerp;
-      currentY += dy * lerp;
-      writeVars();
-      // 接近静止时,跳出循环节省 CPU
-      if (Math.abs(dx) < epsilon && Math.abs(dy) < epsilon) {
-        stillFrames += 1;
-        if (stillFrames >= 6) {
-          // snap 归位再退出
-          currentX = targetX;
-          currentY = targetY;
-          writeVars();
-          raf = null;
-          return;
-        }
-      } else {
-        stillFrames = 0;
-      }
-      raf = window.requestAnimationFrame(tick);
-    };
-
-    const ensureRunning = (): void => {
-      if (raf === null) {
-        raf = window.requestAnimationFrame(tick);
-      }
-    };
-
-    const handlePointerMove = (e: PointerEvent): void => {
-      if (e.pointerType === "touch") return;
-      const rect = node.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      // 映射到 (-1, 1),边角取 ±1
-      targetX = Math.max(-1, Math.min(1, x * 2 - 1));
-      targetY = Math.max(-1, Math.min(1, y * 2 - 1));
-      ensureRunning();
-    };
-
-    const handlePointerLeave = (): void => {
-      targetX = 0;
-      targetY = 0;
-      // 强制贴近 0,避免 lerp 长尾停在 ~0.05deg
-      if (Math.abs(currentX) < 0.06 && Math.abs(currentY) < 0.06) {
-        currentX = 0;
-        currentY = 0;
-        writeVars();
-        return;
-      }
-      ensureRunning();
-    };
-
-    // 媒体查询变化时(用户切换深色模式 / 改系统设置)实时同步,简单粗暴重渲染
-    const handleMediaChange = (): void => {
-      if (mqlReduce.matches || mqlNarrow.matches || mqlCoarse.matches) {
-        targetX = 0;
-        targetY = 0;
-        ensureRunning();
-      }
-    };
-
-    node.addEventListener("pointermove", handlePointerMove);
-    node.addEventListener("pointerleave", handlePointerLeave);
-    mqlReduce.addEventListener?.("change", handleMediaChange);
-    mqlNarrow.addEventListener?.("change", handleMediaChange);
-    mqlCoarse.addEventListener?.("change", handleMediaChange);
-    // 初始化变量
-    writeVars();
-
-    return () => {
-      node.removeEventListener("pointermove", handlePointerMove);
-      node.removeEventListener("pointerleave", handlePointerLeave);
-      mqlReduce.removeEventListener?.("change", handleMediaChange);
-      mqlNarrow.removeEventListener?.("change", handleMediaChange);
-      mqlCoarse.removeEventListener?.("change", handleMediaChange);
-      if (raf !== null) window.cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  function showContactPhone(): void {
-    window.alert(`联系方式：${contactPhone}`);
+  function handleHeroParticleComplete(): void {
+    setHeroParticleDone(true);
   }
 
   function handleNavSelect(href: string): void {
@@ -977,8 +897,6 @@ export default function ResumePage(): JSX.Element {
 
   return (
     <main className="resume-page" aria-label="张远博个人简历">
-      {/* Global pixel trail layer */}
-      <PixelTrail />
       <div className="resume-global-system-backdrop" aria-hidden="true">
         <div
           className="resume-global-system-bg"
@@ -1026,7 +944,7 @@ export default function ResumePage(): JSX.Element {
       </div>
 
       <nav className="resume-nav resume-nav--overlay" aria-label="作品集导航">
-        <a className="resume-nav-brand" href="#resume-hero" aria-label="返回首页">
+        <a className="resume-nav-brand" href="#home" aria-label="返回首页">
           <span>YUANBO ZHANG</span>
           <strong>PORTFOLIO</strong>
         </a>
@@ -1048,194 +966,131 @@ export default function ResumePage(): JSX.Element {
       <HangingBadge />
 
       <section
-        id="resume-hero"
-        ref={heroRef}
-        className={`resume-hero resume-screen resume-lockscreen resume-hero--overlay${isLoaded ? " is-loaded" : ""}`}
-        aria-labelledby="resume-hero-title"
+        id="home"
+        className={infoVisible ? "hero-section visible" : "hero-section"}
+        aria-labelledby="hero-title"
       >
-        <video
-          className="resume-lock-bg-video"
-          src={heroLockVideoAsset}
-          poster={heroLockBgAsset}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-        />
-        <img className="resume-lock-bg-asset" src={heroLockBgAsset} alt="" aria-hidden="true" />
-        <div className="resume-lock-frame" aria-hidden="true" />
+        <img className="hero-stage-bg" src={heroReferenceStageAsset} alt="" aria-hidden="true" />
+        <div className="hero-stage-tint" aria-hidden="true" />
+        <div className="hero-grid" aria-hidden="true" />
+        <div className="hero-scanline" aria-hidden="true" />
+        <div className="hero-avatar-glow" aria-hidden="true" />
+        <div className="hero-display-name" aria-hidden="true">ZHANG YUANBO</div>
 
-        <div className="resume-hero-overlay" aria-hidden="true">
-          <span className="resume-hero-hud resume-hero-hud-tl" />
-          <span className="resume-hero-hud resume-hero-hud-tr" />
-          <span className="resume-hero-hud resume-hero-hud-bl" />
-          <span className="resume-hero-hud resume-hero-hud-br" />
-        </div>
-
-        <div className="resume-hero-stage">
-          {/* 主身份 HUD 面板 */}
-          <div ref={heroPanelRef} className="resume-hero-panel" role="group" aria-labelledby="resume-hero-title">
-            <span className="resume-hero-panel-aura" aria-hidden="true" />
-            <span className="resume-hero-panel-frame resume-hero-panel-frame--outer" aria-hidden="true" />
-            <span className="resume-hero-panel-rim" aria-hidden="true" />
-            <span className="resume-hero-panel-node resume-hero-panel-node--top" aria-hidden="true" />
-            <span className="resume-hero-panel-node resume-hero-panel-node--bottom" aria-hidden="true" />
-            <span className="resume-hero-panel-node resume-hero-panel-node--left" aria-hidden="true" />
-            <span className="resume-hero-panel-node resume-hero-panel-node--right" aria-hidden="true" />
-            <span className="resume-hero-panel-scanlines" aria-hidden="true" />
-
-            {/* Left: round avatar orb with bottom-up projection beam */}
-            <TiltedCard
-              rotateAmplitude={14}
-              scaleOnHover={1.06}
-              captionText="ID·ZYB-2024 · AI Workflow Engineer"
-              containerWidth="100%"
-              contentWidth="100%"
-              className="resume-avatar-orb-tilt"
-            >
-              <div className="resume-avatar-orb" aria-hidden="true">
-              <div className="resume-avatar-ring">
-                <span className="resume-avatar-ring-glow" aria-hidden="true" />
-                <span className="resume-avatar-ring-outer" aria-hidden="true" />
-                <span className="resume-avatar-ring-track" aria-hidden="true" />
-                <span className="resume-avatar-ring-inner" aria-hidden="true" />
-                <svg className="resume-avatar-ring-arc" viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-                  <path d="M 50 8 A 42 42 0 0 0 8 50" fill="none" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" strokeLinecap="round" />
-                  <path d="M 50 92 A 42 42 0 0 0 92 50" fill="none" stroke="rgba(255,77,255,0.7)" strokeWidth="0.8" strokeLinecap="round" />
-                  <line x1="50" y1="3" x2="50" y2="7" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" />
-                  <line x1="50" y1="93" x2="50" y2="97" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" />
-                  <line x1="3" y1="50" x2="7" y2="50" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" />
-                  <line x1="93" y1="50" x2="97" y2="50" stroke="rgba(21,247,255,0.85)" strokeWidth="0.8" />
-                </svg>
-                <span className="resume-avatar-ring-tag" aria-hidden="true">
-                  <i className="resume-avatar-ring-tag-led" />
-                  <span>ID-2024</span>
-                </span>
-                <span className="resume-avatar-ring-tag resume-avatar-ring-tag--right" aria-hidden="true">
-                  <i className="resume-avatar-ring-tag-led resume-avatar-ring-tag-led--mag" />
-                  <span>SYNC·OK</span>
-                </span>
-                <div className="resume-avatar-portrait-wrap">
-                  <span className="resume-avatar-portrait-rim" aria-hidden="true" />
-                  <span className="resume-avatar-portrait-toplight" aria-hidden="true" />
-                  <img
-                    src={candidateAvatarAsset}
-                    className="resume-avatar-portrait"
-                    alt=""
-                    draggable={false}
-                  />
-                </div>
-              </div>
-
-              <div className="resume-avatar-beam">
-                <span className="resume-avatar-beam-shaft" />
-                <span className="resume-avatar-beam-dust" />
-                <span className="resume-avatar-beam-glow" />
-              </div>
-
-              <div className="resume-avatar-pedestal">
-                <span className="resume-avatar-pedestal-water" />
-                <span className="resume-avatar-pedestal-halo" />
-                <span className="resume-avatar-pedestal-disc resume-avatar-pedestal-disc--outer" />
-                <span className="resume-avatar-pedestal-disc resume-avatar-pedestal-disc--mid" />
-                <span className="resume-avatar-pedestal-flow" />
-              </div>
-            </div>
-
-            </TiltedCard>
-
-            {/* 右侧:身份信息 */}
-            <div className="resume-hero-info">
-              <span className="resume-hero-kicker" aria-hidden="true">
-                <em>01</em>
-                <i />
-                <span>HOME · YUANBO ZHANG</span>
-              </span>
-              <h1 id="resume-hero-title">张远博</h1>
-              <h2>AI 应用开发 / FDE / AI 工作流落地</h2>
-
-              <ul className="resume-hero-chips" role="list">
-                <li className="resume-hero-chip">
-                  <MapPin size={12} aria-hidden="true" />
-                  杭州
-                </li>
-                <li className="resume-hero-chip">
-                  <Workflow size={12} aria-hidden="true" />
-                  AI 应用落地
-                </li>
-                <li className="resume-hero-chip">
-                  <ImageIcon size={12} aria-hidden="true" />
-                  电商视觉生成
-                </li>
-                <li className="resume-hero-chip">
-                  <Bot size={12} aria-hidden="true" />
-                  自动化工作流
-                </li>
-              </ul>
-
-              <div className="resume-hero-actions resume-hero-actions--overlay">
-                <a className="resume-hero-btn resume-hero-btn--primary" href="#resume-project-archive">
-                  <PlayCircle size={14} aria-hidden="true" />
-                  查看项目
-                </a>
-                <button className="resume-hero-btn resume-hero-btn--ghost resume-hero-btn--contact" type="button" onClick={showContactPhone}>
-                  <Mail size={14} aria-hidden="true" />
-                  联系我
-                </button>
-              </div>
-            </div>
+        <div className="hero-info">
+          <div className="hero-headline">
+            <span className="hero-kicker">AI WORKFLOW ENGINEER · FDE</span>
+            <h1 id="hero-title" className="hero-name-cn">
+              <span>AI 接入真实业务</span>
+              <span>做成可运行的工作系统</span>
+            </h1>
           </div>
 
-          {/* 右侧精选案例 HUD 卡 */}
-          <TiltedCard
-            rotateAmplitude={12}
-            scaleOnHover={1.04}
-            captionText="▶ 立即查看 · CASE 01"
-            containerWidth="auto"
-            contentWidth="100%"
-            className="resume-hero-feature-tilt"
-          >
-            <aside className="resume-hero-feature" aria-label="精选案例">
-            <span className="resume-hero-feature-aura" aria-hidden="true" />
-            <span className="resume-hero-feature-rim" aria-hidden="true" />
-            <div className="resume-hero-feature-head">
-              <span className="resume-hero-feature-tag">精选案例</span>
-              <a href="#resume-project-archive" aria-label="进入项目档案">
-                →
-              </a>
-            </div>
-            <button
-              className="resume-hero-feature-preview"
-              type="button"
-              onClick={() => setActiveImagePreview(ecommerceScreenshots[0])}
-              aria-label={`查看 ${ecommerceScreenshots[0].title}`}
-            >
-              <img src={ecommerceScreenshots[0].src} alt={ecommerceScreenshots[0].title} />
-              <span className="resume-hero-feature-meta" aria-hidden="true">
-                <span>CASE · 01</span>
-                <span className="resume-hero-feature-meta-bar"><i style={{ width: "78%" }} /></span>
-              </span>
-            </button>
-            <strong>AI 驱动内容生产引擎</strong>
-            <p>生产 → 分发 → 复盘 → 优化</p>
-            <span className="resume-hero-feature-dots" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <i />
-            </span>
-            <a className="resume-hero-feature-go" href="#resume-project-archive">
-              立即查看
-              <span>→</span>
+          <div className="hero-social">
+            <p className="hero-value-prop">把复杂的 AI 逻辑，变成能落地的工作流程。</p>
+          </div>
+
+          <div className="hero-actions">
+            <a className="hero-btn-primary" href="#resume-project-archive">
+              <Briefcase size={15} aria-hidden="true" />
+              查看项目
             </a>
-            </aside>
-          </TiltedCard>
+            <a className="hero-btn-secondary" href="mailto:1425514532@qq.com">
+              <Mail size={15} aria-hidden="true" />
+              联系我
+            </a>
+          </div>
         </div>
 
-        <a className="resume-lock-scroll" href="#resume-core-stack" aria-label="继续向下浏览">
-          <span />
+        <div
+          className={[
+            "hero-avatar-container",
+            heroVideoReady ? "is-ready" : "",
+            heroParticleDone ? "is-particle-done" : "",
+            heroVideoFailed ? "is-fallback" : ""
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          <img
+            className="hero-avatar-placeholder"
+            src={heroCharacterPosterAsset}
+            alt=""
+            aria-hidden="true"
+          />
+          {heroVideoReady && !heroParticleDone && !heroVideoFailed ? (
+            <ParticleReveal
+              className="hero-avatar-particle-reveal"
+              imageSrc={heroCharacterPosterAsset}
+              particleSize={1.65}
+              density={4}
+              scatter={132}
+              gatherDuration={1450}
+              stagger={260}
+              onComplete={handleHeroParticleComplete}
+            />
+          ) : null}
+          <video
+            ref={heroVideoRef}
+            className="hero-avatar-video"
+            poster={heroCharacterPosterAsset}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            onCanPlay={() => {
+              setHeroVideoFailed(false);
+              setHeroVideoReady(true);
+            }}
+            onTimeUpdate={handleHeroTimeUpdate}
+            onError={handleHeroMediaError}
+            aria-label="角色从查看手机到抬手指向下方的循环动画"
+          >
+            <source src={heroCharacterWebmAsset} type="video/webm" />
+            <source src={heroCharacterMp4Asset} type="video/mp4" />
+          </video>
+        </div>
+
+        <aside className="hero-profile-card" aria-label="张远博个人档案">
+          <div className="profile-card-header">
+            <span>PROFILE / 交付档案</span>
+            <span>2026</span>
+          </div>
+          <div className="profile-card-row">
+            <span className="profile-key">NAME</span>
+            <span className="profile-value">张远博</span>
+          </div>
+          <div className="profile-card-row">
+            <span className="profile-key">ROLE</span>
+            <span className="profile-value">AI 工作流工程师 / FDE</span>
+          </div>
+          <div className="profile-card-row">
+            <span className="profile-key">BASE</span>
+            <span className="profile-value">杭州 · 中国</span>
+          </div>
+          <div className="profile-card-row">
+            <span className="profile-key">FOCUS</span>
+            <span className="profile-value">内容运营 / 电商视觉 / Agent 原型</span>
+          </div>
+          <div className="profile-card-row">
+            <span className="profile-key">STATUS</span>
+            <span className="profile-value status-available">
+              <i className="profile-status-dot" aria-hidden="true" />
+              <span>可接项目 / 随时到岗</span>
+            </span>
+          </div>
+          <div className="profile-card-row">
+            <span className="profile-key">CONTACT</span>
+            <a className="profile-value profile-email" href="mailto:1425514532@qq.com">
+              1425514532@qq.com
+            </a>
+          </div>
+        </aside>
+
+        <a className="hero-scroll-hint" href="#resume-core-stack" aria-label="向下滚动，查看完整交付档案">
+          <ChevronDown className="scroll-arrow" size={18} aria-hidden="true" />
+          <span>向下滚动 · 查看完整交付档案</span>
         </a>
       </section>
 
@@ -1257,27 +1112,71 @@ export default function ResumePage(): JSX.Element {
         <span className="cap-hud cap-hud-bl" aria-hidden="true" />
         <span className="cap-hud cap-hud-br" aria-hidden="true" />
         <div className="cap-stack-shell resume-director-shell">
-          <div className="resume-section-header">
-            <SectionKicker index="04" label="AI Video Direction" />
-            <h2 id="resume-director-title">AI导演作品集</h2>
-            <p>精选 3 个 AI 导演 / AIGC 漫剧作品，呈现从创意构思、分镜设计到画面生成与后期剪辑的完整能力。</p>
-            <div className="resume-director-inline-flow" aria-label="导演工作流">
-              <span>创意构思</span>
-              <span>分镜设计</span>
-              <span>提示词优化</span>
-              <span>画面生成</span>
-              <span>镜头衔接</span>
-              <span>后期剪辑</span>
-            </div>
-          </div>
-
           <div className="resume-director-stage">
-            <div className="resume-director-grid">
-              {directorWorks.map((work, index) => (
-                <DirectorWorkCard work={work} index={index} onPlay={setActiveDirectorWork} key={work.title} />
-              ))}
+            <div className="resume-director-composition">
+              <div className="resume-director-editorial">
+                <div className="resume-section-header">
+                  <SectionKicker index="04" label="AI Video Direction" />
+                  <h2 id="resume-director-title">AI导演作品集</h2>
+                  <p>从 9 部 AI 漫剧样片中精选 3 部重点作品，并保留 6 部可播放样片，展示从剧情拆解、分镜统筹到成片交付的导演能力。</p>
+                  <div className="resume-director-inline-flow" aria-label="导演工作流">
+                    <span>创意构思</span>
+                    <span>分镜设计</span>
+                    <span>提示词优化</span>
+                    <span>画面生成</span>
+                    <span>镜头衔接</span>
+                    <span>后期剪辑</span>
+                  </div>
+                </div>
+
+                <div className="resume-director-editorial-note">
+                  <span>DIRECTOR&apos;S DECK / AI VIDEO</span>
+                  <strong>把叙事拆成镜头，把镜头变成可交付的影像资产。</strong>
+                </div>
+
+                <div className="resume-director-metrics" aria-label="导演作品集概览">
+                  <div>
+                    <strong>120min+</strong>
+                    <span>长片级交付</span>
+                  </div>
+                  <div>
+                    <strong>7D</strong>
+                    <span>最快交付周期</span>
+                  </div>
+                  <div>
+                    <strong>09</strong>
+                    <span>样片归档</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="resume-director-card-swap-zone">
+                <div className="resume-director-card-swap-caption">
+                  <span>CARDS / AUTO ROTATE</span>
+                  <strong>悬停暂停 · 点击播放</strong>
+                </div>
+                <CardSwap
+                  width={620}
+                  height={440}
+                  cardDistance={72}
+                  verticalDistance={48}
+                  delay={5200}
+                  pauseOnHover
+                  skewAmount={2}
+                  enabled={directorVisible}
+                  aria-label="AI导演作品卡片轮换"
+                >
+                  {directorWorks.map((work, index) => (
+                    <DirectorWorkCard work={work} index={index} onPlay={setActiveDirectorWork} key={work.title} />
+                  ))}
+                </CardSwap>
+              </div>
             </div>
 
+            <div className="resume-director-library-head">
+              <span>MORE WORKS / SAMPLE LIBRARY</span>
+              <strong>6 部补充样片 · 点击封面播放</strong>
+            </div>
             <DirectorReel clips={directorReelClips} onPlay={setActiveDirectorWork} />
           </div>
         </div>
@@ -1446,7 +1345,10 @@ export default function ResumePage(): JSX.Element {
           aria-label={activeDirectorWork.title + "精选片段"}
           onClick={() => setActiveDirectorWork(null)}
         >
-          <div className="resume-video-modal-panel" onClick={(event) => event.stopPropagation()}>
+          <div
+            className={`resume-video-modal-panel is-${activeDirectorWork.format}`}
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="resume-video-modal-head">
               <div>
                 <span>{activeDirectorWork.type}</span>

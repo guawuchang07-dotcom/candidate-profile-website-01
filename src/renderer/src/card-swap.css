@@ -1,0 +1,35 @@
+.resume-card-swap {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: visible;
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.resume-card-swap-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: visible;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+}
+
+.resume-card-swap-card[data-front="true"] {
+  pointer-events: auto;
+}
+
+.resume-card-swap-card > .resume-director-card {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resume-card-swap-card {
+    transition: none !important;
+  }
+}
